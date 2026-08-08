@@ -338,7 +338,7 @@
 
   .set-row{
     display:grid;
-    grid-template-columns:58px 1fr 1fr 44px;
+    grid-template-columns:58px 1fr 1fr;
     gap:8px;
     align-items:center;
   }
@@ -348,10 +348,6 @@
     font-size:13px;
   }
 
-  .check{
-    width:20px;
-    height:20px;
-  }
 
   .saved-actions{
     display:flex;
@@ -364,6 +360,56 @@
     color:var(--muted);
     font-size:13px;
     line-height:1.5;
+  }
+
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:9999;
+  }
+
+  .modal-overlay.open{
+    display:flex;
+  }
+
+  .modal-card{
+    width:min(440px,100%);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 24px 80px rgba(0,0,0,.45);
+    text-align:center;
+  }
+
+  .modal-card h3{
+    margin:0 0 10px;
+    font-size:22px;
+  }
+
+  .modal-card p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+
+  .delete-confirm{
+    background:var(--danger);
+    border-color:var(--danger);
+    color:white;
   }
 
   @media(max-width:680px){
@@ -439,7 +485,10 @@
           <div class="routine-title" id="logTitle"></div>
           <div class="muted" id="dateLabel"></div>
         </div>
-        <button id="saveWorkoutBtn" class="primary" type="button">Save Workout</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="deleteWorkoutBtn" class="danger" type="button" onclick="openDeleteModal()">Delete Saved Workout</button>
+          <button id="saveWorkoutBtn" class="primary" type="button">Save Workout</button>
+        </div>
       </div>
       <div id="workoutArea"></div>
       <div class="status" id="logStatus"></div>
@@ -468,6 +517,17 @@
   </section>
 
 </div>
+
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card">
+      <h3 id="deleteModalTitle">Are you sure?</h3>
+      <p id="deleteModalMessage">This saved workout will be permanently deleted.</p>
+      <div class="modal-actions">
+        <button type="button" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" class="delete-confirm" onclick="confirmDeleteWorkout()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 const defaultPlan = {"programName": "5-Day Push Pull Arms+Abs Upper Legs", "days": {"Alpha": [{"exercise": "Bench Press", "sets": 3, "repRange": "6-8"}, {"exercise": "Incline Dumbbell Press", "sets": 3, "repRange": "8-10"}, {"exercise": "Pec Deck or Cable Fly", "sets": 2, "repRange": "10-15"}, {"exercise": "Cable Lateral Raise", "sets": 3, "repRange": "12-15"}, {"exercise": "Triceps Pushdown", "sets": 3, "repRange": "10-15"}], "Beta": [{"exercise": "Barbell Row", "sets": 3, "repRange": "6-8"}, {"exercise": "Wide-Grip Lat Pulldown", "sets": 3, "repRange": "8-10"}, {"exercise": "Seated Cable Row", "sets": 3, "repRange": "8-12"}, {"exercise": "Reverse Pec Deck", "sets": 2, "repRange": "12-15"}, {"exercise": "Dumbbell or Cable Curl", "sets": 3, "repRange": "8-12"}], "Gamma": [{"exercise": "EZ-Bar Curl", "sets": 3, "repRange": "8-10"}, {"exercise": "Skull Crushers", "sets": 3, "repRange": "8-10"}, {"exercise": "Incline Dumbbell Curl", "sets": 3, "repRange": "10-12"}, {"exercise": "Rope Triceps Pushdown", "sets": 3, "repRange": "10-15"}, {"exercise": "Hanging Leg Raise", "sets": 3, "repRange": "10-15"}, {"exercise": "Cable Crunch", "sets": 3, "repRange": "10-15"}], "Delta": [{"exercise": "Incline Machine Press", "sets": 3, "repRange": "8-12"}, {"exercise": "Chest-Supported Row", "sets": 3, "repRange": "8-12"}, {"exercise": "Narrow-Grip Lat Pulldown", "sets": 3, "repRange": "8-12"}, {"exercise": "Seated Dumbbell Shoulder Press", "sets": 3, "repRange": "8-10"}, {"exercise": "Pec Deck", "sets": 2, "repRange": "10-15"}, {"exercise": "Cable Lateral Raise", "sets": 2, "repRange": "12-20"}], "Epsilon": [{"exercise": "Back Squat", "sets": 3, "repRange": "5-8"}, {"exercise": "Romanian Deadlift", "sets": 3, "repRange": "6-10"}, {"exercise": "Leg Press", "sets": 3, "repRange": "8-12"}, {"exercise": "Leg Curl", "sets": 3, "repRange": "10-15"}, {"exercise": "Leg Extension", "sets": 2, "repRange": "10-15"}, {"exercise": "Standing Calf Raise", "sets": 3, "repRange": "10-15"}]}};
@@ -617,9 +677,6 @@ function renderLog(){
         <input inputmode="numeric" placeholder="Reps"
           value="${savedSet.reps ?? ""}"
           data-field="reps" data-ex="${exIndex}" data-set="${s}">
-        <input class="check" type="checkbox"
-          ${savedSet.completed ? "checked" : ""}
-          data-field="completed" data-ex="${exIndex}" data-set="${s}" title="Completed">
       `;
       setsDiv.appendChild(row);
     }
@@ -724,16 +781,12 @@ document.getElementById("saveWorkoutBtn").onclick=()=>{
       const repsInput=document.querySelector(
         `input[data-ex="${exIndex}"][data-set="${setNum}"][data-field="reps"]`
       );
-      const completedInput=document.querySelector(
-        `input[data-ex="${exIndex}"][data-set="${setNum}"][data-field="completed"]`
-      );
       return {
         set:Number(setNum),
         weight:weightInput.value!=="" ? Number(weightInput.value) : null,
-        reps:repsInput.value!=="" ? Number(repsInput.value) : null,
-        completed:completedInput.checked
+        reps:repsInput.value!=="" ? Number(repsInput.value) : null
       };
-    }).filter(s=>s.weight!==null || s.reps!==null || s.completed);
+    }).filter(s=>s.weight!==null || s.reps!==null);
 
     exercises.push({exercise:ex.exercise,sets});
   });
@@ -755,6 +808,56 @@ document.getElementById("saveWorkoutBtn").onclick=()=>{
   renderCalendar();
   renderLog();
 };
+
+
+
+function openDeleteModal(){
+  const saved=getLogForDate(selectedDate);
+  const status=document.getElementById("logStatus");
+
+  if(!saved){
+    status.textContent="No saved workout exists for this date.";
+    setTimeout(()=>status.textContent="",1800);
+    return;
+  }
+
+  const workoutName=saved.workoutName || saved.day || "workout";
+  document.getElementById("deleteModalMessage").textContent =
+    `Delete the saved ${workoutName} workout for ${prettyDate(selectedDate)}? This cannot be undone.`;
+
+  document.getElementById("deleteModal").classList.add("open");
+}
+
+function closeDeleteModal(){
+  document.getElementById("deleteModal").classList.remove("open");
+}
+
+function confirmDeleteWorkout(){
+  const dateToDelete=selectedDate;
+
+  // Remove every log stored on the selected calendar date.
+  logs=logs.filter(log=>String(log.date)!==String(dateToDelete));
+
+  // Write the new array directly to browser storage.
+  localStorage.setItem("workoutLogs",JSON.stringify(logs));
+
+  closeDeleteModal();
+
+  // Force every part of the page to refresh from the updated logs array.
+  renderCalendar();
+  renderLog();
+
+  const status=document.getElementById("logStatus");
+  status.textContent="Workout deleted.";
+  setTimeout(()=>status.textContent="",1800);
+}
+
+// Allow tapping the dark background to close the confirmation.
+document.getElementById("deleteModal").addEventListener("click",e=>{
+  if(e.target.id==="deleteModal"){
+    closeDeleteModal();
+  }
+});
 
 document.getElementById("clearLogsBtn").onclick=()=>{
   if(confirm("Clear all saved workout history?")){
