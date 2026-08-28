@@ -17,6 +17,7 @@
     --border:#263241;
     --success:#27c281;
     --danger:#ff5b66;
+    --alpha:#ff5b66; --beta:#4f8cff; --gamma:#32c982; --delta:#ff9f43; --epsilon:#ffd84d;
   }
 
   *{box-sizing:border-box}
@@ -539,6 +540,13 @@ let selectedDate = todayISO();
 let calendarCursor = new Date();
 calendarCursor.setDate(1);
 
+let hasUnsavedChanges=false;
+const workoutColors={Alpha:getComputedStyle(document.documentElement).getPropertyValue("--alpha").trim(),Beta:getComputedStyle(document.documentElement).getPropertyValue("--beta").trim(),Gamma:getComputedStyle(document.documentElement).getPropertyValue("--gamma").trim(),Delta:getComputedStyle(document.documentElement).getPropertyValue("--delta").trim(),Epsilon:getComputedStyle(document.documentElement).getPropertyValue("--epsilon").trim()};
+function routineSignature(r){return JSON.stringify((r||[]).map(ex=>({exercise:ex.exercise,sets:Number(ex.sets),repRange:String(ex.repRange)})));}
+function warnUnsaved(){return !hasUnsavedChanges || window.confirm("WARNING: You have unsaved data that may be lost forever");}
+function markDirty(){hasUnsavedChanges=true;}
+function getPreviousWorkoutLog(name,beforeDate){return logs.filter(l=>(l.workoutName||l.day)===name&&l.date<beforeDate).sort((a,b)=>b.date.localeCompare(a.date))[0]||null;}
+
 const workoutTabs = document.getElementById("workoutTabs");
 const routineEditor = document.getElementById("routineEditor");
 const workoutArea = document.getElementById("workoutArea");
@@ -594,11 +602,9 @@ function renderTabs(){
     const btn=document.createElement("button");
     btn.type="button";
     btn.className="workout-tab"+(name===currentWorkout?" active":"");
+    btn.dataset.workout=name;
     btn.textContent=name;
-    btn.onclick=()=>{
-      currentWorkout=name;
-      renderAll();
-    };
+    btn.onclick=()=>{if(name===currentWorkout)return;if(!warnUnsaved())return;currentWorkout=name;hasUnsavedChanges=false;renderAll();};
     workoutTabs.appendChild(btn);
   });
 }
@@ -646,51 +652,34 @@ function getLogForDate(date){
 }
 
 function renderLog(){
-  logTitle.textContent=currentWorkout;
-  dateLabel.textContent=prettyDate(selectedDate);
-  workoutArea.innerHTML="";
-
-  const saved = getLogForDate(selectedDate);
-  const savedExercises = saved && saved.workoutName===currentWorkout ? saved.exercises : [];
-
-  (plan.days[currentWorkout] || []).forEach((ex,exIndex)=>{
-    const card=document.createElement("div");
-    card.className="exercise";
-    card.innerHTML=`
-      <div class="exercise-name">${escapeHtml(ex.exercise)}</div>
-      <div class="prescription">${ex.sets} sets × ${escapeHtml(ex.repRange)} reps</div>
-      <div class="sets"></div>
-    `;
-
+  const saved=getLogForDate(selectedDate);
+  const savedWorkoutName=saved?(saved.workoutName||saved.day||currentWorkout):currentWorkout;
+  if(saved&&plan.days[savedWorkoutName]) currentWorkout=savedWorkoutName;
+  const currentRoutine=plan.days[currentWorkout]||[];
+  const savedSnapshot=saved?.routineSnapshot||null;
+  const routineToRender=saved&&savedSnapshot?savedSnapshot:currentRoutine;
+  const isLegacy=Boolean(saved&&savedSnapshot&&routineSignature(savedSnapshot)!==routineSignature(currentRoutine));
+  logTitle.innerHTML=`${escapeHtml(currentWorkout)}${isLegacy?'<span class="legacy-tag">Legacy</span>':''}`;
+  dateLabel.textContent=prettyDate(selectedDate); workoutArea.innerHTML="";
+  const previousLog=!saved?getPreviousWorkoutLog(currentWorkout,selectedDate):null;
+  routineToRender.forEach((ex,exIndex)=>{
+    const card=document.createElement("div"); card.className="exercise";
+    card.innerHTML=`<div class="exercise-name">${escapeHtml(ex.exercise)}</div><div class="prescription">${ex.sets} sets × ${escapeHtml(ex.repRange)} reps</div><div class="sets"></div>`;
     const setsDiv=card.querySelector(".sets");
-    const savedEx=savedExercises.find(x=>x.exercise===ex.exercise);
-
+    const savedEx=saved?.exercises?.find(x=>x.exercise===ex.exercise);
+    const previousEx=previousLog?.exercises?.find(x=>x.exercise===ex.exercise);
     for(let s=1;s<=ex.sets;s++){
-      const savedSet=savedEx?.sets?.find(x=>x.set===s) || {};
-      const row=document.createElement("div");
-      row.className="set-row";
-      row.innerHTML=`
-        <div class="set-num">Set ${s}</div>
-        <input inputmode="decimal" placeholder="Weight"
-          value="${savedSet.weight ?? ""}"
-          data-field="weight" data-ex="${exIndex}" data-set="${s}">
-        <input inputmode="numeric" placeholder="Reps"
-          value="${savedSet.reps ?? ""}"
-          data-field="reps" data-ex="${exIndex}" data-set="${s}">
-      `;
+      const savedSet=savedEx?.sets?.find(x=>x.set===s)||{}; const previousSet=previousEx?.sets?.find(x=>x.set===s)||{};
+      const row=document.createElement("div"); row.className="set-row";
+      row.innerHTML=`<div class="set-num">Set ${s}</div><input inputmode="decimal" placeholder="${escapeAttr(previousSet.weight!=null?`Previous: ${previousSet.weight}`:'Weight')}" value="${savedSet.weight??''}" data-field="weight" data-ex="${exIndex}" data-set="${s}"><input inputmode="numeric" placeholder="${escapeAttr(previousSet.reps!=null?`Previous: ${previousSet.reps}`:'Reps')}" value="${savedSet.reps??''}" data-field="reps" data-ex="${exIndex}" data-set="${s}">`;
       setsDiv.appendChild(row);
     }
+    if(previousEx&&!saved){const note=document.createElement("div");note.className="previous-note";note.textContent=`Previous ${currentWorkout}: ${prettyDate(previousLog.date)}`;card.appendChild(note);}
     workoutArea.appendChild(card);
   });
-
-  if(saved){
-    selectedDateBanner.innerHTML=
-      `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>`+
-      `${escapeHtml(saved.workoutName || saved.day || "Workout")} saved on this date.`;
-  } else {
-    selectedDateBanner.innerHTML=
-      `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>No saved workout on this date.`;
-  }
+  workoutArea.querySelectorAll('input[data-field="weight"],input[data-field="reps"]').forEach(i=>i.addEventListener("input",markDirty));
+  if(saved){selectedDateBanner.innerHTML=`<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>${escapeHtml(savedWorkoutName)} saved on this date.${isLegacy?' <span class="legacy-tag">Legacy</span>':''}`;}
+  else{selectedDateBanner.innerHTML=`<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>No saved workout on this date.`;}
 }
 
 function renderCalendar(){
@@ -709,7 +698,7 @@ function renderCalendar(){
   const first=new Date(year,month,1);
   const start=new Date(year,month,1-first.getDay());
 
-  const loggedDates=new Set(logs.map(l=>l.date));
+  const loggedByDate=new Map(); logs.forEach(l=>loggedByDate.set(l.date,l));
 
   for(let i=0;i<42;i++){
     const d=new Date(start);
@@ -722,9 +711,12 @@ function renderCalendar(){
     if(iso===todayISO()) cell.classList.add("today");
     if(iso===selectedDate) cell.classList.add("selected");
 
+    const loggedWorkout=loggedByDate.get(iso);
+    const loggedWorkoutName=loggedWorkout?(loggedWorkout.workoutName||loggedWorkout.day||""):"";
+    const dumbbellColor=workoutColors[loggedWorkoutName]||"var(--accent)";
     cell.innerHTML=`<div class="cal-num">${d.getDate()}</div>` +
-      (loggedDates.has(iso) ? `
-        <div class="dumbbell" aria-label="Workout completed" title="Workout completed">
+      (loggedWorkout ? `
+        <div class="dumbbell" style="color:${dumbbellColor}" aria-label="${escapeHtml(loggedWorkoutName)} workout completed" title="${escapeHtml(loggedWorkoutName)} workout completed">
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <g fill="currentColor" transform="rotate(-45 32 32)">
               <!-- thin center bar -->
@@ -742,11 +734,13 @@ function renderCalendar(){
         </div>` : "");
 
     cell.onclick=()=>{
+      if(iso!==selectedDate && !warnUnsaved()) return;
       selectedDate=iso;
       const saved=getLogForDate(selectedDate);
       if(saved && saved.workoutName && plan.days[saved.workoutName]){
         currentWorkout=saved.workoutName;
       }
+      hasUnsavedChanges=false;
       renderAll();
       document.getElementById("loggingSection").scrollIntoView({behavior:"smooth",block:"start"});
     };
@@ -772,41 +766,11 @@ document.getElementById("addExerciseBtn").onclick=()=>{
 };
 
 document.getElementById("saveWorkoutBtn").onclick=()=>{
-  const exercises=[];
-
-  (plan.days[currentWorkout] || []).forEach((ex,exIndex)=>{
-    const setRows=[...document.querySelectorAll(`input[data-ex="${exIndex}"][data-field="weight"]`)];
-    const sets=setRows.map(weightInput=>{
-      const setNum=weightInput.dataset.set;
-      const repsInput=document.querySelector(
-        `input[data-ex="${exIndex}"][data-set="${setNum}"][data-field="reps"]`
-      );
-      return {
-        set:Number(setNum),
-        weight:weightInput.value!=="" ? Number(weightInput.value) : null,
-        reps:repsInput.value!=="" ? Number(repsInput.value) : null
-      };
-    }).filter(s=>s.weight!==null || s.reps!==null);
-
-    exercises.push({exercise:ex.exercise,sets});
-  });
-
-  const newLog={
-    date:selectedDate,
-    timestamp:new Date().toISOString(),
-    workoutName:currentWorkout,
-    exercises
-  };
-
-  logs=logs.filter(l=>l.date!==selectedDate);
-  logs.push(newLog);
-  saveLogs();
-
-  document.getElementById("logStatus").textContent="Workout saved.";
-  setTimeout(()=>document.getElementById("logStatus").textContent="",1400);
-
-  renderCalendar();
-  renderLog();
+  const routineSnapshot=JSON.parse(JSON.stringify(plan.days[currentWorkout]||[])); const exercises=[];
+  routineSnapshot.forEach((ex,exIndex)=>{const weights=[...document.querySelectorAll(`input[data-ex="${exIndex}"][data-field="weight"]`)];const sets=weights.map(w=>{const sn=w.dataset.set;const r=document.querySelector(`input[data-ex="${exIndex}"][data-set="${sn}"][data-field="reps"]`);return{set:Number(sn),weight:w.value!==""?Number(w.value):null,reps:r.value!==""?Number(r.value):null};}).filter(s=>s.weight!==null||s.reps!==null);exercises.push({exercise:ex.exercise,sets});});
+  const newLog={date:selectedDate,timestamp:new Date().toISOString(),workoutName:currentWorkout,routineSnapshot,routineSignature:routineSignature(routineSnapshot),exercises};
+  logs=logs.filter(l=>l.date!==selectedDate);logs.push(newLog);saveLogs();hasUnsavedChanges=false;
+  document.getElementById("logStatus").textContent="Workout saved.";setTimeout(()=>document.getElementById("logStatus").textContent="",1400);renderCalendar();renderLog();
 };
 
 
@@ -840,6 +804,7 @@ function confirmDeleteWorkout(){
 
   // Write the new array directly to browser storage.
   localStorage.setItem("workoutLogs",JSON.stringify(logs));
+  hasUnsavedChanges=false;
 
   closeDeleteModal();
 
@@ -962,6 +927,8 @@ function renderAll(){
   renderLog();
   renderCalendar();
 }
+
+window.addEventListener("beforeunload",e=>{if(!hasUnsavedChanges)return;e.preventDefault();e.returnValue="";});
 
 migrateOldPlanIfNeeded();
 renderAll();
