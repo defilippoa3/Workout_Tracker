@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker</title>
+<title>Workout Tracker V22</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -273,8 +273,7 @@
   }
 
   .workout-tab.active{
-    background:var(--accent2);
-    border-color:var(--accent2);
+    font-weight:800;
   }
 
   .routine-top,
@@ -299,7 +298,7 @@
 
   .routine-row{
     display:grid;
-    grid-template-columns:2fr 85px 120px 44px;
+    grid-template-columns:38px 2fr 85px 120px 44px;
     gap:8px;
   }
 
@@ -419,105 +418,653 @@
     .calendar-grid{gap:5px}
     .cal-day{min-height:64px;padding:6px}
     .dumbbell{font-size:16px;right:6px;bottom:6px}
-    .routine-row{grid-template-columns:1fr 70px 95px 40px}
-    .set-row{grid-template-columns:48px 1fr 1fr 36px}
+    .routine-row{grid-template-columns:36px 1fr 62px 82px 36px}
+    .set-row{grid-template-columns:48px 1fr 1fr}
   }
+
+  /* Workout identity colors */
+  .workout-tab[data-workout="Alpha"]{border-color:var(--alpha);color:var(--alpha);}
+  .workout-tab[data-workout="Beta"]{border-color:var(--beta);color:var(--beta);}
+  .workout-tab[data-workout="Gamma"]{border-color:var(--gamma);color:var(--gamma);}
+  .workout-tab[data-workout="Delta"]{border-color:var(--delta);color:var(--delta);}
+  .workout-tab[data-workout="Epsilon"]{border-color:var(--epsilon);color:var(--epsilon);}
+
+  .workout-tab[data-workout="Alpha"].active{background:var(--alpha);border-color:var(--alpha);color:white;}
+  .workout-tab[data-workout="Beta"].active{background:var(--beta);border-color:var(--beta);color:white;}
+  .workout-tab[data-workout="Gamma"].active{background:var(--gamma);border-color:var(--gamma);color:#07150f;}
+  .workout-tab[data-workout="Delta"].active{background:var(--delta);border-color:var(--delta);color:#201000;}
+  .workout-tab[data-workout="Epsilon"].active{background:var(--epsilon);border-color:var(--epsilon);color:#211b00;}
+
+  input::placeholder{color:#788594;opacity:.66;}
+  .previous-note{margin-top:8px;color:var(--muted);font-size:12px;}
+
+
+  .unsaved-overlay{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.72);
+    z-index:11000;
+  }
+
+  .unsaved-overlay.open{
+    display:flex;
+  }
+
+  .unsaved-card{
+    width:min(460px,100%);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);
+  }
+
+  .unsaved-card h3{
+    margin:0 0 10px;
+    font-size:22px;
+    color:#ff8c94;
+  }
+
+  .unsaved-card p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .unsaved-actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+  }
+
+
+
+  .routine-row{
+    position:relative;
+  }
+
+  .routine-row.dragging{
+    opacity:.58;
+    border-radius:10px;
+    background:rgba(79,140,255,.10);
+  }
+
+  .drag-handle{
+    width:38px;
+    min-width:38px;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+    line-height:1;
+    cursor:grab;
+    touch-action:none;
+    user-select:none;
+    color:var(--muted);
+  }
+
+  .drag-handle:active{
+    cursor:grabbing;
+  }
+
+  .routine-drag-note{
+    margin:0 0 12px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+  }
+
+
+  body{
+    padding-bottom:92px;
+  }
+
+  .app{
+    max-width:980px;
+  }
+
+  .page-shell{
+    width:100%;
+  }
+
+  .app-page{
+    display:none;
+  }
+
+  .app-page.active{
+    display:block;
+  }
+
+  .page-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+  }
+
+  .page-title{
+    text-align:center;
+    font-size:22px;
+    font-weight:900;
+    margin-bottom:18px;
+  }
+
+  .section-static{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+
+  .section-static:last-child{
+    margin-bottom:0;
+  }
+
+  .static-section-title{
+    text-align:center;
+    padding:16px 18px 12px;
+    font-size:18px;
+    font-weight:900;
+  }
+
+  .static-section-body{
+    padding:0 18px 18px;
+  }
+
+  .settings-card{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+  }
+
+  .settings-title{
+    text-align:center;
+    font-size:18px;
+    font-weight:900;
+    margin-bottom:16px;
+  }
+
+  .bottom-nav{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    transform:translateX(-50%);
+    width:min(980px,100%);
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+    background:#0f141b;
+    border-top:1px solid var(--border);
+    z-index:9000;
+    padding-bottom:max(8px, env(safe-area-inset-bottom));
+    box-shadow:0 -10px 30px rgba(0,0,0,.28);
+  }
+
+  .nav-btn{
+    appearance:none;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    border-radius:0;
+    padding:10px 8px 7px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-height:66px;
+  }
+
+  .nav-btn:hover{
+    border-color:transparent;
+  }
+
+  .nav-btn.active{
+    color:var(--accent);
+    background:rgba(79,140,255,.08);
+  }
+
+  .nav-icon{
+    width:25px;
+    height:25px;
+    display:block;
+  }
+
+  .nav-icon svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  .nav-label{
+    font-size:12px;
+    font-weight:800;
+  }
+
+  @media(max-width:680px){
+    .app{
+      padding-left:10px;
+      padding-right:10px;
+      padding-top:18px;
+    }
+
+    .hero{
+      margin-bottom:16px;
+    }
+
+    .hero h1{
+      font-size:32px;
+    }
+
+    .page-card{
+      padding:12px;
+      border-radius:14px;
+    }
+
+    .static-section-body{
+      padding:0 12px 14px;
+    }
+
+    .workout-tabs{
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:5px;
+    }
+
+    .workout-tab{
+      min-height:42px;
+      padding:8px 4px;
+      font-size:12px;
+    }
+  }
+
+
+  .workout-page-date{
+    text-align:center;
+    font-size:20px;
+    font-weight:900;
+    margin:2px 0 18px;
+    letter-spacing:-0.01em;
+  }
+
+
+  .calendar-summary{
+    margin-top:16px;
+  }
+
+  .calendar-summary-empty{
+    background:var(--panel3);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    color:var(--muted);
+  }
+
+  .calendar-summary-card{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+  }
+
+  .calendar-summary-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    padding:16px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .calendar-summary-title{
+    font-size:20px;
+    font-weight:900;
+    margin-bottom:3px;
+  }
+
+  .calendar-summary-date{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .calendar-summary-exercises{
+    padding:12px;
+    display:grid;
+    gap:10px;
+  }
+
+  .summary-exercise{
+    background:var(--panel3);
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:12px;
+  }
+
+  .summary-exercise-name{
+    font-size:15px;
+    font-weight:850;
+    margin-bottom:8px;
+  }
+
+  .summary-prescription{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:-4px;
+    margin-bottom:9px;
+  }
+
+  .summary-sets{
+    display:grid;
+    gap:6px;
+  }
+
+  .summary-set{
+    display:grid;
+    grid-template-columns:54px 1fr;
+    gap:8px;
+    align-items:center;
+    font-size:13px;
+  }
+
+  .summary-set-label{
+    color:var(--muted);
+  }
+
+  .summary-set-value{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:7px 9px;
+  }
+
+  .edit-workout-btn{
+    flex:0 0 auto;
+  }
+
+  @media(max-width:560px){
+    .calendar-summary-head{
+      flex-direction:column;
+      align-items:stretch;
+    }
+
+    .edit-workout-btn{
+      width:100%;
+    }
+  }
+
+
+  .calendar-workout-markers{
+    position:absolute;
+    right:7px;
+    bottom:6px;
+    display:flex;
+    align-items:center;
+    gap:3px;
+    pointer-events:none;
+  }
+
+  .calendar-workout-markers .dumbbell{
+    position:static;
+    right:auto;
+    bottom:auto;
+  }
+
+  .missing-data-icon{
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#ff5b66;
+    color:white;
+    font-size:13px;
+    line-height:1;
+    font-weight:950;
+    box-shadow:0 0 0 2px var(--panel3);
+  }
+
+
+  .master-routine-row{
+    display:grid;
+    grid-template-columns:42px 2fr 85px 120px 44px;
+    gap:8px;
+    align-items:center;
+    margin-bottom:8px;
+  }
+
+  .master-routine-row.dragging{
+    opacity:.55;
+  }
+
+  @media(max-width:680px){
+    .master-routine-row{
+      grid-template-columns:36px 1fr 62px 82px 36px;
+      gap:5px;
+    }
+  }
+
+
+  .routine-toggle{
+    width:100%;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    color:var(--text);
+    padding:16px 18px 12px;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    font-size:18px;
+    font-weight:900;
+  }
+
+  .routine-toggle span:first-child{
+    grid-column:2;
+    text-align:center;
+  }
+
+  .routine-chevron{
+    grid-column:3;
+    justify-self:end;
+    transition:transform .18s ease;
+    color:var(--muted);
+    font-size:20px;
+  }
+
+  .routine-collapsible:not(.open) .routine-chevron{
+    transform:rotate(-90deg);
+  }
+
+  .routine-collapsible:not(.open) .routine-collapsible-body{
+    display:none;
+  }
+
+  .routine-toggle:hover{
+    border-color:transparent;
+  }
+
 </style>
 </head>
 <body>
 <div class="app">
+  <datalist id="exerciseLibrary"></datalist>
 
   <header class="hero">
     <h1>Workout Tracker</h1>
-    <p>Build your weekly routine, track weight and reps, and use the calendar to jump back to any saved workout.</p>
+    <p>Build your routine, record your workouts, and review your training history.</p>
   </header>
 
-  <section class="section" id="calendarSection">
-    <button class="section-head" type="button" data-toggle="calendarSection">
-      <span>Calendar</span>
-      <span class="chevron">⌄</span>
-    </button>
-    <div class="section-body">
-      <div class="calendar-toolbar">
-        <button id="prevMonthBtn" type="button">‹</button>
-        <strong id="monthLabel"></strong>
-        <button id="nextMonthBtn" type="button">›</button>
-      </div>
-      <div class="calendar-grid" id="calendarGrid"></div>
-      <div class="selected-date-banner" id="selectedDateBanner">
-        Select a date to view saved workout information.
-      </div>
-    </div>
-  </section>
-
-  <section class="section open" id="routineSection">
-    <button class="section-head" type="button" data-toggle="routineSection">
-      <span>Routine</span>
-      <span class="chevron">⌄</span>
-    </button>
-    <div class="section-body">
-      <div class="routine-top">
-        <div>
-          <div class="routine-title" id="routineTitle"></div>
-          <div class="muted">Edit exercise name, set count, or rep target.</div>
+  <main class="page-shell">
+    <!-- CALENDAR PAGE -->
+    <section class="app-page active" id="calendarPage" data-page="calendar">
+      <div class="page-card">
+        <div class="page-title">Calendar</div>
+        <div class="calendar-toolbar">
+          <button id="prevMonthBtn" type="button">‹</button>
+          <strong id="monthLabel"></strong>
+          <button id="nextMonthBtn" type="button">›</button>
         </div>
-        <button id="addExerciseBtn" type="button">+ Add Exercise</button>
-      </div>
-      <div class="routine-editor" id="routineEditor"></div>
-      <div class="status" id="routineStatus"></div>
-    </div>
-  </section>
+        <div class="calendar-grid" id="calendarGrid"></div>
 
-  <section class="section workouts-static" id="workoutsSection">
-    <div class="static-section-title">Workouts</div>
-    <div class="static-section-body">
-      <div class="workout-tabs" id="workoutTabs"></div>
-    </div>
-  </section>
-
-  <section class="section open" id="loggingSection">
-    <button class="section-head" type="button" data-toggle="loggingSection">
-      <span>Workout Log</span>
-      <span class="chevron">⌄</span>
-    </button>
-    <div class="section-body">
-      <div class="logging-top">
-        <div>
-          <div class="routine-title" id="logTitle"></div>
-          <div class="muted" id="dateLabel"></div>
+        <div class="calendar-summary" id="calendarSummary">
+          <div class="calendar-summary-empty">
+            Select a date to view saved workout information.
+          </div>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button id="deleteWorkoutBtn" class="danger" type="button" onclick="openDeleteModal()">Delete Saved Workout</button>
-          <button id="saveWorkoutBtn" class="primary" type="button">Save Workout</button>
+
+        <div class="selected-date-banner" id="selectedDateBanner" style="display:none;"></div>
+      </div>
+    </section>
+
+    <!-- WORKOUT PAGE -->
+    <section class="app-page" id="workoutPage" data-page="workout">
+      <div class="page-card">
+        <div class="workout-page-date" id="workoutPageDate"></div>
+
+        <div class="section-static">
+          <div class="static-section-title">Workouts</div>
+          <div class="static-section-body">
+            <div class="workout-tabs" id="workoutTabs"></div>
+          </div>
+        </div>
+
+        <div class="section-static routine-collapsible open" id="workoutRoutineSection">
+          <button class="routine-toggle" id="routineToggleBtn" type="button" aria-expanded="true" aria-controls="workoutRoutineBody">
+            <span>Routine</span>
+            <span class="routine-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="static-section-body routine-collapsible-body" id="workoutRoutineBody">
+            <div class="routine-top">
+              <div>
+                <div class="routine-title" id="routineTitle"></div>
+                <div class="muted">If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.</div>
+              </div>
+              <button id="addExerciseBtn" type="button">+ Add Exercise</button>
+            </div>
+            <div class="routine-editor" id="routineEditor"></div>
+            <div class="status" id="routineStatus"></div>
+          </div>
+        </div>
+
+        <div class="section-static">
+          <div class="static-section-title">Record Workout</div>
+          <div class="static-section-body">
+            <div class="logging-top">
+              <div>
+                <div class="routine-title" id="logTitle"></div>
+                <div class="muted" id="dateLabel"></div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="deleteWorkoutBtn" class="danger" type="button" onclick="openDeleteModal()">Delete Saved Workout</button>
+                <button id="saveWorkoutBtn" class="primary" type="button">Save Workout</button>
+              </div>
+            </div>
+            <div id="workoutArea"></div>
+            <div class="status" id="logStatus"></div>
+          </div>
         </div>
       </div>
-      <div id="workoutArea"></div>
-      <div class="status" id="logStatus"></div>
-    </div>
-  </section>
+    </section>
 
-  <section class="section" id="savedInfoSection">
-    <button class="section-head" type="button" data-toggle="savedInfoSection">
-      <span>Saved Information</span>
-      <span class="chevron">⌄</span>
+    <!-- SETTINGS PAGE -->
+    <section class="app-page" id="settingsPage" data-page="settings">
+      <div class="page-card">
+        <div class="page-title">Settings</div>
+        <div class="settings-card" id="masterTemplatesCard">
+          <div class="settings-title">Master Routine Templates</div>
+          <div class="saved-note" style="margin-top:0;margin-bottom:14px;">
+            These are the default Alpha through Epsilon routines for future workout days.
+            Editing a master template never changes an existing workout day.
+          </div>
+
+          <div class="workout-tabs" id="masterWorkoutTabs"></div>
+
+          <div class="routine-top" style="margin-top:16px;">
+            <div>
+              <div class="routine-title" id="masterRoutineTitle">Alpha</div>
+              <div class="muted">Edit the default routine for future workouts.</div>
+            </div>
+            <button id="addMasterExerciseBtn" type="button">+ Add Exercise</button>
+          </div>
+
+          <div class="routine-editor" id="masterRoutineEditor"></div>
+          <div class="status" id="masterRoutineStatus"></div>
+        </div>
+
+        <div style="height:16px;"></div>
+
+        <div class="settings-card">
+          <div class="settings-title">Saved Information</div>
+          <div class="saved-actions">
+            <label class="file-label">
+              Import JSON
+              <input id="importFile" type="file" accept=".json" hidden>
+            </label>
+            <button id="exportBtn" type="button">Export JSON</button>
+            <button id="clearLogsBtn" class="danger" type="button">Clear Saved Workouts</button>
+          </div>
+          <div class="saved-note">
+            Your master templates, date-specific routines, and workout logs are stored in this browser. Export JSON anytime if you want a backup.
+          </div>
+          <div class="status" id="savedStatus"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-btn active" type="button" data-page-target="calendar" aria-label="Calendar">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M7 3v4M17 3v4M3 9h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">Calendar</span>
     </button>
-    <div class="section-body">
-      <div class="saved-actions">
-        <label class="file-label">
-          Import JSON
-          <input id="importFile" type="file" accept=".json" hidden>
-        </label>
-        <button id="exportBtn" type="button">Export JSON</button>
-        <button id="clearLogsBtn" class="danger" type="button">Clear Saved Workouts</button>
-      </div>
-      <div class="saved-note">
-        Your routine and workout logs are stored in this browser. Export JSON anytime if you want a backup.
-      </div>
-      <div class="status" id="savedStatus"></div>
-    </div>
-  </section>
 
-</div>
+    <button class="nav-btn" type="button" data-page-target="workout" aria-label="Workout">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 10v4M7 8v8M17 8v8M20 10v4M7 12h10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">Workout</span>
+    </button>
+
+    <button class="nav-btn" type="button" data-page-target="settings" aria-label="Settings">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 8.5A3.5 3.5 0 1 0 12 15.5A3.5 3.5 0 1 0 12 8.5Z" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.4 1a7 7 0 0 0-2.1-1.2L14 3h-4l-.4 2.7a7 7 0 0 0-2.1 1.2l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 2.1 1.2L10 21h4l.4-2.7a7 7 0 0 0 2.1-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+
+  <div class="modal-overlay" id="editWorkoutModal" role="dialog" aria-modal="true" aria-labelledby="editWorkoutModalTitle">
+    <div class="modal-card">
+      <h3 id="editWorkoutModalTitle">Are you sure you want to edit?</h3>
+      <p id="editWorkoutModalMessage">This will open the saved workout for editing.</p>
+      <div class="modal-actions">
+        <button type="button" onclick="closeEditWorkoutModal()">Cancel</button>
+        <button type="button" class="primary" onclick="confirmEditWorkout()">Yes, Edit Workout</button>
+      </div>
+    </div>
+  </div>
 
   <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
     <div class="modal-card">
@@ -530,22 +1077,120 @@
     </div>
   </div>
 
+  <div class="unsaved-overlay" id="unsavedOverlay" role="dialog" aria-modal="true" aria-labelledby="unsavedTitle">
+    <div class="unsaved-card">
+      <h3 id="unsavedTitle">WARNING</h3>
+      <p>You have unsaved data that may be lost forever.</p>
+      <div class="unsaved-actions">
+        <button type="button" onclick="cancelUnsavedNavigation()">Stay Here</button>
+        <button type="button" class="danger" onclick="confirmUnsavedNavigation()">Leave Without Saving</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 const defaultPlan = {"programName": "5-Day Push Pull Arms+Abs Upper Legs", "days": {"Alpha": [{"exercise": "Bench Press", "sets": 3, "repRange": "6-8"}, {"exercise": "Incline Dumbbell Press", "sets": 3, "repRange": "8-10"}, {"exercise": "Pec Deck or Cable Fly", "sets": 2, "repRange": "10-15"}, {"exercise": "Cable Lateral Raise", "sets": 3, "repRange": "12-15"}, {"exercise": "Triceps Pushdown", "sets": 3, "repRange": "10-15"}], "Beta": [{"exercise": "Barbell Row", "sets": 3, "repRange": "6-8"}, {"exercise": "Wide-Grip Lat Pulldown", "sets": 3, "repRange": "8-10"}, {"exercise": "Seated Cable Row", "sets": 3, "repRange": "8-12"}, {"exercise": "Reverse Pec Deck", "sets": 2, "repRange": "12-15"}, {"exercise": "Dumbbell or Cable Curl", "sets": 3, "repRange": "8-12"}], "Gamma": [{"exercise": "EZ-Bar Curl", "sets": 3, "repRange": "8-10"}, {"exercise": "Skull Crushers", "sets": 3, "repRange": "8-10"}, {"exercise": "Incline Dumbbell Curl", "sets": 3, "repRange": "10-12"}, {"exercise": "Rope Triceps Pushdown", "sets": 3, "repRange": "10-15"}, {"exercise": "Hanging Leg Raise", "sets": 3, "repRange": "10-15"}, {"exercise": "Cable Crunch", "sets": 3, "repRange": "10-15"}], "Delta": [{"exercise": "Incline Machine Press", "sets": 3, "repRange": "8-12"}, {"exercise": "Chest-Supported Row", "sets": 3, "repRange": "8-12"}, {"exercise": "Narrow-Grip Lat Pulldown", "sets": 3, "repRange": "8-12"}, {"exercise": "Seated Dumbbell Shoulder Press", "sets": 3, "repRange": "8-10"}, {"exercise": "Pec Deck", "sets": 2, "repRange": "10-15"}, {"exercise": "Cable Lateral Raise", "sets": 2, "repRange": "12-20"}], "Epsilon": [{"exercise": "Back Squat", "sets": 3, "repRange": "5-8"}, {"exercise": "Romanian Deadlift", "sets": 3, "repRange": "6-10"}, {"exercise": "Leg Press", "sets": 3, "repRange": "8-12"}, {"exercise": "Leg Curl", "sets": 3, "repRange": "10-15"}, {"exercise": "Leg Extension", "sets": 2, "repRange": "10-15"}, {"exercise": "Standing Calf Raise", "sets": 3, "repRange": "10-15"}]}};
 
 let plan = JSON.parse(localStorage.getItem("workoutPlan")) || defaultPlan;
 let logs = JSON.parse(localStorage.getItem("workoutLogs")) || [];
+let dayRoutines = JSON.parse(localStorage.getItem("dayRoutines")) || {};
+let masterCurrentWorkout = "Alpha";
+
+// Unsaved routine edits live only in memory.
+// They are discarded when you leave without saving or reload the page.
+let temporaryRoutine = null;
+let temporaryRoutineKey = null;
+let routineHasUnsavedChanges = false;
 let currentWorkout = Object.keys(plan.days)[0];
 let selectedDate = todayISO();
 let calendarCursor = new Date();
 calendarCursor.setDate(1);
 
 let hasUnsavedChanges=false;
-const workoutColors={Alpha:getComputedStyle(document.documentElement).getPropertyValue("--alpha").trim(),Beta:getComputedStyle(document.documentElement).getPropertyValue("--beta").trim(),Gamma:getComputedStyle(document.documentElement).getPropertyValue("--gamma").trim(),Delta:getComputedStyle(document.documentElement).getPropertyValue("--delta").trim(),Epsilon:getComputedStyle(document.documentElement).getPropertyValue("--epsilon").trim()};
-function routineSignature(r){return JSON.stringify((r||[]).map(ex=>({exercise:ex.exercise,sets:Number(ex.sets),repRange:String(ex.repRange)})));}
-function warnUnsaved(){return !hasUnsavedChanges || window.confirm("WARNING: You have unsaved data that may be lost forever");}
-function markDirty(){hasUnsavedChanges=true;}
-function getPreviousWorkoutLog(name,beforeDate){return logs.filter(l=>(l.workoutName||l.day)===name&&l.date<beforeDate).sort((a,b)=>b.date.localeCompare(a.date))[0]||null;}
+let loadedFormSignature="";
+let pendingNavigation=null;
+
+const workoutColors={Alpha:"#ff5b66",Beta:"#4f8cff",Gamma:"#32c982",Delta:"#ff9f43",Epsilon:"#ffd84d"};
+
+function routineSignature(r){
+  return JSON.stringify((r||[]).map(ex=>({
+    exercise:String(ex.exercise||"").trim(),
+    sets:Number(ex.sets)||0,
+    repRange:String(ex.repRange||"").trim()
+  })));
+}
+
+function getCurrentFormSignature(){
+  const fields=[...workoutArea.querySelectorAll(
+    'input[data-field="weight"], input[data-field="reps"]'
+  )];
+  return JSON.stringify(fields.map(i=>({
+    ex:i.dataset.ex,
+    set:i.dataset.set,
+    field:i.dataset.field,
+    value:String(i.value||"").trim()
+  })));
+}
+
+function refreshDirtyState(){
+  const logChanged=getCurrentFormSignature() !== loadedFormSignature;
+  hasUnsavedChanges = logChanged || routineHasUnsavedChanges;
+  return hasUnsavedChanges;
+}
+
+function markDirty(){
+  refreshDirtyState();
+}
+
+function attemptNavigation(action){
+  refreshDirtyState();
+
+  if(!hasUnsavedChanges){
+    action();
+    return;
+  }
+
+  pendingNavigation=action;
+  document.getElementById("unsavedOverlay").classList.add("open");
+}
+
+function cancelUnsavedNavigation(){
+  pendingNavigation=null;
+  document.getElementById("unsavedOverlay").classList.remove("open");
+}
+
+function confirmUnsavedNavigation(){
+  const action=pendingNavigation;
+  pendingNavigation=null;
+  hasUnsavedChanges=false;
+  routineHasUnsavedChanges=false;
+  temporaryRoutine=null;
+  temporaryRoutineKey=null;
+  document.getElementById("unsavedOverlay").classList.remove("open");
+  if(action) action();
+}
+
+function normalizeExerciseName(name){
+  return String(name||"").trim().toLowerCase();
+}
+
+function getPreviousExerciseData(workoutName,exerciseName,beforeDate){
+  const exactName=String(exerciseName||"").trim();
+  const candidates=logs
+    .filter(l=>(l.workoutName||l.day)===workoutName && l.date<beforeDate)
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  for(const log of candidates){
+    const match=(log.exercises||[]).find(ex=>
+      String(ex.exercise||"").trim()===exactName
+    );
+    if(match){
+      return {log,exercise:match};
+    }
+  }
+
+  return null;
+}
 
 const workoutTabs = document.getElementById("workoutTabs");
 const routineEditor = document.getElementById("routineEditor");
@@ -556,6 +1201,7 @@ const dateLabel = document.getElementById("dateLabel");
 const calendarGrid = document.getElementById("calendarGrid");
 const monthLabel = document.getElementById("monthLabel");
 const selectedDateBanner = document.getElementById("selectedDateBanner");
+const calendarSummary = document.getElementById("calendarSummary");
 
 function todayISO(){
   const d = new Date();
@@ -567,6 +1213,25 @@ function localISO(d){
   const m = String(d.getMonth()+1).padStart(2,"0");
   const day = String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${day}`;
+}
+
+function ordinalDay(n){
+  const mod100=n%100;
+  if(mod100>=11 && mod100<=13) return `${n}th`;
+  switch(n%10){
+    case 1:return `${n}st`;
+    case 2:return `${n}nd`;
+    case 3:return `${n}rd`;
+    default:return `${n}th`;
+  }
+}
+
+function workoutHeaderDate(iso){
+  const [y,m,d]=iso.split("-").map(Number);
+  const date=new Date(y,m-1,d);
+  const weekday=date.toLocaleDateString(undefined,{weekday:"long"});
+  const month=date.toLocaleDateString(undefined,{month:"long"});
+  return `${weekday}, ${month} ${ordinalDay(d)}, ${y}`;
 }
 
 function prettyDate(iso){
@@ -596,6 +1261,95 @@ function saveLogs(){
   localStorage.setItem("workoutLogs",JSON.stringify(logs));
 }
 
+
+function dayRoutineKey(date,workoutName){
+  return `${date}::${workoutName}`;
+}
+
+function cloneRoutine(routine){
+  return JSON.parse(JSON.stringify(routine || []));
+}
+
+function saveDayRoutines(){
+  localStorage.setItem("dayRoutines",JSON.stringify(dayRoutines));
+}
+
+function getExistingSavedWorkoutForDate(date){
+  return getLogForDate(date);
+}
+
+function resolveWorkoutForDate(date){
+  const saved=getExistingSavedWorkoutForDate(date);
+
+  if(saved){
+    const savedName=saved.workoutName || saved.day;
+    if(savedName && plan.days[savedName]){
+      currentWorkout=savedName;
+    }
+  }
+
+  if(!plan.days[currentWorkout]){
+    currentWorkout=Object.keys(plan.days)[0] || "Alpha";
+  }
+
+  return saved;
+}
+
+function resetTemporaryRoutine(){
+  temporaryRoutine=null;
+  temporaryRoutineKey=null;
+  routineHasUnsavedChanges=false;
+}
+
+function getWorkingRoutine(date,workoutName){
+  const saved=getLogForDate(date);
+
+  // SAVED DAY: always use that day's saved routine snapshot.
+  if(
+    saved &&
+    (saved.workoutName || saved.day)===workoutName &&
+    Array.isArray(saved.routineSnapshot)
+  ){
+    return cloneRoutine(saved.routineSnapshot);
+  }
+
+  // UNSAVED DAY: use an in-memory copy of the CURRENT master template.
+  // Nothing is written to localStorage until Save Workout is pressed.
+  const key=dayRoutineKey(date,workoutName);
+
+  if(temporaryRoutineKey!==key || !Array.isArray(temporaryRoutine)){
+    temporaryRoutineKey=key;
+    temporaryRoutine=cloneRoutine(plan.days[workoutName] || []);
+    routineHasUnsavedChanges=false;
+  }
+
+  return temporaryRoutine;
+}
+
+function setWorkingRoutine(date,workoutName,routine){
+  const saved=getLogForDate(date);
+
+  if(
+    saved &&
+    (saved.workoutName || saved.day)===workoutName
+  ){
+    // Editing a saved workout is still only committed when Save Workout is pressed.
+    temporaryRoutineKey=dayRoutineKey(date,workoutName);
+    temporaryRoutine=cloneRoutine(routine);
+    routineHasUnsavedChanges=true;
+    return;
+  }
+
+  temporaryRoutineKey=dayRoutineKey(date,workoutName);
+  temporaryRoutine=cloneRoutine(routine);
+  routineHasUnsavedChanges=true;
+}
+
+function removeSavedDayRoutine(date,workoutName){
+  delete dayRoutines[dayRoutineKey(date,workoutName)];
+  saveDayRoutines();
+}
+
 function renderTabs(){
   workoutTabs.innerHTML="";
   Object.keys(plan.days).forEach(name=>{
@@ -604,24 +1358,46 @@ function renderTabs(){
     btn.className="workout-tab"+(name===currentWorkout?" active":"");
     btn.dataset.workout=name;
     btn.textContent=name;
-    btn.onclick=()=>{if(name===currentWorkout)return;if(!warnUnsaved())return;currentWorkout=name;hasUnsavedChanges=false;renderAll();};
+
+    btn.onclick=()=>{
+      if(name===currentWorkout) return;
+
+      attemptNavigation(()=>{
+        currentWorkout=name;
+        resetTemporaryRoutine();
+        hasUnsavedChanges=false;
+        renderTabs();
+        renderRoutineEditor();
+        renderLog();
+      });
+    };
+
     workoutTabs.appendChild(btn);
   });
 }
 
 function renderRoutineEditor(){
+  resolveWorkoutForDate(selectedDate);
+
   routineTitle.textContent=currentWorkout;
   routineEditor.innerHTML="";
 
-  (plan.days[currentWorkout] || []).forEach((ex,idx)=>{
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
+
+  routine.forEach((ex,idx)=>{
     const row=document.createElement("div");
     row.className="routine-row";
+    row.dataset.originalIndex=String(idx);
+    row.draggable=true;
+
     row.innerHTML=`
+      <button type="button" class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
       <input value="${escapeAttr(ex.exercise)}" data-edit="exercise" data-i="${idx}" aria-label="Exercise name">
       <input type="number" min="1" value="${ex.sets}" data-edit="sets" data-i="${idx}" aria-label="Sets">
       <input value="${escapeAttr(ex.repRange)}" data-edit="repRange" data-i="${idx}" aria-label="Rep range">
       <button type="button" class="danger" data-remove="${idx}" title="Remove">×</button>
     `;
+
     routineEditor.appendChild(row);
   });
 
@@ -629,19 +1405,332 @@ function renderRoutineEditor(){
     input.addEventListener("change",e=>{
       const i=Number(e.target.dataset.i);
       const field=e.target.dataset.edit;
-      plan.days[currentWorkout][i][field] =
-        field==="sets" ? Math.max(1,Number(e.target.value)||1) : e.target.value;
-      savePlan();
+      const routine=getWorkingRoutine(selectedDate,currentWorkout);
+
+      routine[i][field]=
+        field==="sets"
+          ? Math.max(1,Number(e.target.value)||1)
+          : e.target.value;
+
+      setWorkingRoutine(selectedDate,currentWorkout,routine);
+      refreshDirtyState();
+
+      const status=document.getElementById("routineStatus");
+      status.textContent="Temporary change. Save Workout to keep it.";
+      setTimeout(()=>status.textContent="",1600);
+
       renderLog();
     });
   });
 
   routineEditor.querySelectorAll("[data-remove]").forEach(btn=>{
     btn.onclick=()=>{
-      plan.days[currentWorkout].splice(Number(btn.dataset.remove),1);
-      savePlan();
-      renderAll();
+      const routine=getWorkingRoutine(selectedDate,currentWorkout);
+      routine.splice(Number(btn.dataset.remove),1);
+
+      setWorkingRoutine(selectedDate,currentWorkout,routine);
+      refreshDirtyState();
+      renderRoutineEditor();
+      renderLog();
     };
+  });
+
+  setupRoutineDragAndDrop();
+}
+
+function commitRoutineOrderFromDom(){
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
+  const oldRoutine=[...routine];
+
+  const order=[...routineEditor.querySelectorAll(".routine-row")]
+    .map(row=>Number(row.dataset.originalIndex));
+
+  if(order.length!==oldRoutine.length) return;
+
+  const reordered=order.map(i=>oldRoutine[i]);
+  setWorkingRoutine(selectedDate,currentWorkout,reordered);
+  refreshDirtyState();
+
+  renderRoutineEditor();
+  renderLog();
+}
+
+function setupRoutineDragAndDrop(){
+  let nativeDragged=null;
+
+  routineEditor.querySelectorAll(".routine-row").forEach(row=>{
+    row.addEventListener("dragstart",e=>{
+      nativeDragged=row;
+      row.classList.add("dragging");
+
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",row.dataset.originalIndex||"");
+      }
+    });
+
+    row.addEventListener("dragover",e=>{
+      e.preventDefault();
+      if(!nativeDragged || nativeDragged===row) return;
+
+      const rect=row.getBoundingClientRect();
+      const after=e.clientY>rect.top+rect.height/2;
+      routineEditor.insertBefore(nativeDragged,after?row.nextSibling:row);
+    });
+
+    row.addEventListener("dragend",()=>{
+      row.classList.remove("dragging");
+      nativeDragged=null;
+      commitRoutineOrderFromDom();
+    });
+  });
+
+  let pointerRow=null;
+  let activePointerId=null;
+
+  routineEditor.querySelectorAll(".drag-handle").forEach(handle=>{
+    handle.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse") return;
+
+      pointerRow=handle.closest(".routine-row");
+      activePointerId=e.pointerId;
+      pointerRow.classList.add("dragging");
+      handle.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    });
+
+    handle.addEventListener("pointermove",e=>{
+      if(!pointerRow || e.pointerId!==activePointerId) return;
+
+      const target=
+        document.elementFromPoint(e.clientX,e.clientY)?.closest(".routine-row");
+
+      if(!target || target===pointerRow || target.parentElement!==routineEditor){
+        return;
+      }
+
+      const rect=target.getBoundingClientRect();
+      const after=e.clientY>rect.top+rect.height/2;
+      routineEditor.insertBefore(pointerRow,after?target.nextSibling:target);
+      e.preventDefault();
+    });
+
+    const finish=e=>{
+      if(!pointerRow || e.pointerId!==activePointerId) return;
+
+      pointerRow.classList.remove("dragging");
+
+      try{
+        handle.releasePointerCapture?.(e.pointerId);
+      }catch(_){}
+
+      pointerRow=null;
+      activePointerId=null;
+      commitRoutineOrderFromDom();
+      e.preventDefault();
+    };
+
+    handle.addEventListener("pointerup",finish);
+    handle.addEventListener("pointercancel",finish);
+  });
+}
+
+/* MASTER TEMPLATE EDITOR: Settings only */
+
+function saveMasterPlan(){
+  localStorage.setItem("workoutPlan",JSON.stringify(plan));
+
+  // An unsaved workout should default to the newly updated master template
+  // the next time it is opened.
+  if(!getLogForDate(selectedDate)){
+    resetTemporaryRoutine();
+  }
+
+  const status=document.getElementById("masterRoutineStatus");
+  if(status){
+    status.textContent="Master template saved.";
+    setTimeout(()=>status.textContent="",1300);
+  }
+}
+
+function renderMasterTabs(){
+  const root=document.getElementById("masterWorkoutTabs");
+  if(!root) return;
+
+  root.innerHTML="";
+
+  Object.keys(plan.days).forEach(name=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="workout-tab"+(name===masterCurrentWorkout?" active":"");
+    btn.dataset.workout=name;
+    btn.textContent=name;
+
+    btn.onclick=()=>{
+      masterCurrentWorkout=name;
+      renderMasterTabs();
+      renderMasterRoutineEditor();
+    };
+
+    root.appendChild(btn);
+  });
+}
+
+function renderMasterRoutineEditor(){
+  const title=document.getElementById("masterRoutineTitle");
+  const editor=document.getElementById("masterRoutineEditor");
+
+  if(!title || !editor) return;
+
+  if(!plan.days[masterCurrentWorkout]){
+    masterCurrentWorkout=Object.keys(plan.days)[0] || "Alpha";
+  }
+
+  title.textContent=masterCurrentWorkout;
+  editor.innerHTML="";
+
+  (plan.days[masterCurrentWorkout] || []).forEach((ex,idx)=>{
+    const row=document.createElement("div");
+    row.className="master-routine-row";
+    row.dataset.originalIndex=String(idx);
+    row.draggable=true;
+
+    row.innerHTML=`
+      <button type="button" class="drag-handle master-drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
+      <input value="${escapeAttr(ex.exercise)}" data-master-edit="exercise" data-i="${idx}" aria-label="Exercise name">
+      <input type="number" min="1" value="${ex.sets}" data-master-edit="sets" data-i="${idx}" aria-label="Sets">
+      <input value="${escapeAttr(ex.repRange)}" data-master-edit="repRange" data-i="${idx}" aria-label="Rep range">
+      <button type="button" class="danger" data-master-remove="${idx}" title="Remove">×</button>
+    `;
+
+    editor.appendChild(row);
+  });
+
+  editor.querySelectorAll("[data-master-edit]").forEach(input=>{
+    input.addEventListener("change",e=>{
+      const i=Number(e.target.dataset.i);
+      const field=e.target.dataset.masterEdit;
+
+      plan.days[masterCurrentWorkout][i][field]=
+        field==="sets"
+          ? Math.max(1,Number(e.target.value)||1)
+          : e.target.value;
+
+      saveMasterPlan();
+    });
+  });
+
+  editor.querySelectorAll("[data-master-remove]").forEach(btn=>{
+    btn.onclick=()=>{
+      plan.days[masterCurrentWorkout].splice(
+        Number(btn.dataset.masterRemove),1
+      );
+
+      saveMasterPlan();
+      renderMasterRoutineEditor();
+    };
+  });
+
+  setupMasterDragAndDrop();
+}
+
+function commitMasterRoutineOrder(){
+  const editor=document.getElementById("masterRoutineEditor");
+  if(!editor) return;
+
+  const oldRoutine=[...(plan.days[masterCurrentWorkout] || [])];
+
+  const order=[...editor.querySelectorAll(".master-routine-row")]
+    .map(row=>Number(row.dataset.originalIndex));
+
+  if(order.length!==oldRoutine.length) return;
+
+  plan.days[masterCurrentWorkout]=order.map(i=>oldRoutine[i]);
+  saveMasterPlan();
+  renderMasterRoutineEditor();
+}
+
+function setupMasterDragAndDrop(){
+  const editor=document.getElementById("masterRoutineEditor");
+  if(!editor) return;
+
+  let nativeDragged=null;
+
+  editor.querySelectorAll(".master-routine-row").forEach(row=>{
+    row.addEventListener("dragstart",e=>{
+      nativeDragged=row;
+      row.classList.add("dragging");
+      e.dataTransfer?.setData(
+        "text/plain",
+        row.dataset.originalIndex||""
+      );
+    });
+
+    row.addEventListener("dragover",e=>{
+      e.preventDefault();
+      if(!nativeDragged || nativeDragged===row) return;
+
+      const rect=row.getBoundingClientRect();
+      const after=e.clientY>rect.top+rect.height/2;
+      editor.insertBefore(nativeDragged,after?row.nextSibling:row);
+    });
+
+    row.addEventListener("dragend",()=>{
+      row.classList.remove("dragging");
+      nativeDragged=null;
+      commitMasterRoutineOrder();
+    });
+  });
+
+  let pointerRow=null;
+  let activePointerId=null;
+
+  editor.querySelectorAll(".master-drag-handle").forEach(handle=>{
+    handle.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse") return;
+
+      pointerRow=handle.closest(".master-routine-row");
+      activePointerId=e.pointerId;
+      pointerRow.classList.add("dragging");
+      handle.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    });
+
+    handle.addEventListener("pointermove",e=>{
+      if(!pointerRow || e.pointerId!==activePointerId) return;
+
+      const target=
+        document.elementFromPoint(e.clientX,e.clientY)?.closest(
+          ".master-routine-row"
+        );
+
+      if(!target || target===pointerRow || target.parentElement!==editor){
+        return;
+      }
+
+      const rect=target.getBoundingClientRect();
+      const after=e.clientY>rect.top+rect.height/2;
+      editor.insertBefore(pointerRow,after?target.nextSibling:target);
+      e.preventDefault();
+    });
+
+    const finish=e=>{
+      if(!pointerRow || e.pointerId!==activePointerId) return;
+
+      pointerRow.classList.remove("dragging");
+
+      try{
+        handle.releasePointerCapture?.(e.pointerId);
+      }catch(_){}
+
+      pointerRow=null;
+      activePointerId=null;
+      commitMasterRoutineOrder();
+      e.preventDefault();
+    };
+
+    handle.addEventListener("pointerup",finish);
+    handle.addEventListener("pointercancel",finish);
   });
 }
 
@@ -652,34 +1741,336 @@ function getLogForDate(date){
 }
 
 function renderLog(){
-  const saved=getLogForDate(selectedDate);
-  const savedWorkoutName=saved?(saved.workoutName||saved.day||currentWorkout):currentWorkout;
-  if(saved&&plan.days[savedWorkoutName]) currentWorkout=savedWorkoutName;
-  const currentRoutine=plan.days[currentWorkout]||[];
-  const savedSnapshot=saved?.routineSnapshot||null;
-  const routineToRender=saved&&savedSnapshot?savedSnapshot:currentRoutine;
-  const isLegacy=Boolean(saved&&savedSnapshot&&routineSignature(savedSnapshot)!==routineSignature(currentRoutine));
-  logTitle.innerHTML=`${escapeHtml(currentWorkout)}${isLegacy?'<span class="legacy-tag">Legacy</span>':''}`;
-  dateLabel.textContent=prettyDate(selectedDate); workoutArea.innerHTML="";
-  const previousLog=!saved?getPreviousWorkoutLog(currentWorkout,selectedDate):null;
+  const workoutPageDate=document.getElementById("workoutPageDate");
+  if(workoutPageDate){
+    workoutPageDate.textContent=workoutHeaderDate(selectedDate);
+  }
+
+  const saved=resolveWorkoutForDate(selectedDate);
+
+  const savedWorkoutName=saved
+    ? (saved.workoutName || saved.day || currentWorkout)
+    : currentWorkout;
+
+  // Date-specific routine: old saved dates restore their saved snapshot;
+  // new dates copy the master template only once.
+  const routineToRender=getWorkingRoutine(
+    selectedDate,
+    currentWorkout
+  );
+
+  logTitle.textContent=currentWorkout;
+  dateLabel.textContent=prettyDate(selectedDate);
+  workoutArea.innerHTML="";
+
   routineToRender.forEach((ex,exIndex)=>{
-    const card=document.createElement("div"); card.className="exercise";
-    card.innerHTML=`<div class="exercise-name">${escapeHtml(ex.exercise)}</div><div class="prescription">${ex.sets} sets × ${escapeHtml(ex.repRange)} reps</div><div class="sets"></div>`;
+    const card=document.createElement("div");
+    card.className="exercise";
+    card.innerHTML=`
+      <div class="exercise-name">${escapeHtml(ex.exercise)}</div>
+      <div class="prescription">${ex.sets} sets × ${escapeHtml(ex.repRange)}</div>
+      <div class="sets"></div>
+    `;
+
     const setsDiv=card.querySelector(".sets");
-    const savedEx=saved?.exercises?.find(x=>x.exercise===ex.exercise);
-    const previousEx=previousLog?.exercises?.find(x=>x.exercise===ex.exercise);
+
+    const savedEx=saved?.exercises?.find(
+      x=>String(x.exercise||"").trim()===String(ex.exercise||"").trim()
+    );
+
+    // Recommendation only applies to a NEW workout day.
+    // It searches previous workouts with the SAME routine name and the EXACT same exercise name.
+    const previousData=!saved
+      ? getPreviousExerciseData(currentWorkout,ex.exercise,selectedDate)
+      : null;
+    const previousEx=previousData?.exercise||null;
+
     for(let s=1;s<=ex.sets;s++){
-      const savedSet=savedEx?.sets?.find(x=>x.set===s)||{}; const previousSet=previousEx?.sets?.find(x=>x.set===s)||{};
-      const row=document.createElement("div"); row.className="set-row";
-      row.innerHTML=`<div class="set-num">Set ${s}</div><input inputmode="decimal" placeholder="${escapeAttr(previousSet.weight!=null?`Previous: ${previousSet.weight}`:'Weight')}" value="${savedSet.weight??''}" data-field="weight" data-ex="${exIndex}" data-set="${s}"><input inputmode="numeric" placeholder="${escapeAttr(previousSet.reps!=null?`Previous: ${previousSet.reps}`:'Reps')}" value="${savedSet.reps??''}" data-field="reps" data-ex="${exIndex}" data-set="${s}">`;
+      const savedSet=savedEx?.sets?.find(x=>Number(x.set)===s)||{};
+      const previousSet=previousEx?.sets?.find(x=>Number(x.set)===s)||{};
+
+      const weightHint=previousSet.weight!=null?`${previousSet.weight}`:"Weight";
+      const repsHint=previousSet.reps!=null?`${previousSet.reps}`:"Reps";
+
+      const row=document.createElement("div");
+      row.className="set-row";
+      row.innerHTML=`
+        <div class="set-num">Set ${s}</div>
+        <input
+          inputmode="decimal"
+          placeholder="${escapeAttr(weightHint)}"
+          value="${savedSet.weight??""}"
+          data-field="weight"
+          data-ex="${exIndex}"
+          data-set="${s}"
+        >
+        <input
+          inputmode="numeric"
+          placeholder="${escapeAttr(repsHint)}"
+          value="${savedSet.reps??""}"
+          data-field="reps"
+          data-ex="${exIndex}"
+          data-set="${s}"
+        >
+      `;
       setsDiv.appendChild(row);
     }
-    if(previousEx&&!saved){const note=document.createElement("div");note.className="previous-note";note.textContent=`Previous ${currentWorkout}: ${prettyDate(previousLog.date)}`;card.appendChild(note);}
+
+    if(previousData && !saved){
+      const note=document.createElement("div");
+      note.className="previous-note";
+      note.textContent=`Faded values are from ${prettyDate(previousData.log.date)}, the last ${currentWorkout} workout containing exactly “${ex.exercise}”.`;
+      card.appendChild(note);
+    }
+
     workoutArea.appendChild(card);
   });
-  workoutArea.querySelectorAll('input[data-field="weight"],input[data-field="reps"]').forEach(i=>i.addEventListener("input",markDirty));
-  if(saved){selectedDateBanner.innerHTML=`<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>${escapeHtml(savedWorkoutName)} saved on this date.${isLegacy?' <span class="legacy-tag">Legacy</span>':''}`;}
-  else{selectedDateBanner.innerHTML=`<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>No saved workout on this date.`;}
+
+  workoutArea
+    .querySelectorAll('input[data-field="weight"], input[data-field="reps"]')
+    .forEach(i=>{
+      i.addEventListener("input",markDirty);
+      i.addEventListener("change",markDirty);
+    });
+
+  loadedFormSignature=getCurrentFormSignature();
+  hasUnsavedChanges=routineHasUnsavedChanges;
+
+  if(saved){
+    const savedColor=workoutColors[savedWorkoutName]||"#4f8cff";
+    selectedDateBanner.innerHTML=
+      `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>`+
+      `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${savedColor};margin-right:6px;"></span>`+
+      `${escapeHtml(savedWorkoutName)} saved on this date.`;
+  }else{
+    selectedDateBanner.innerHTML=
+      `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>No saved workout on this date.`;
+  }
+}
+
+
+function formatSummarySet(set){
+  const hasWeight=set && set.weight!==null && set.weight!==undefined && set.weight!=="";
+  const hasReps=set && set.reps!==null && set.reps!==undefined && set.reps!=="";
+
+  if(hasWeight && hasReps) return `${escapeHtml(set.weight)} lb × ${escapeHtml(set.reps)} reps`;
+  if(hasWeight) return `${escapeHtml(set.weight)} lb`;
+  if(hasReps) return `${escapeHtml(set.reps)} reps`;
+  return "No data recorded";
+}
+
+function renderCalendarSummary(){
+  if(!calendarSummary) return;
+
+  const saved=getLogForDate(selectedDate);
+
+  if(!saved){
+    calendarSummary.innerHTML=`
+      <div class="calendar-summary-card">
+        <div class="calendar-summary-head">
+          <div>
+            <div class="calendar-summary-title">No Workout Logged</div>
+            <div class="calendar-summary-date">${escapeHtml(workoutHeaderDate(selectedDate))}</div>
+          </div>
+
+          <button class="primary edit-workout-btn" type="button" onclick="openEditWorkoutModal()">
+            Edit Workout
+          </button>
+        </div>
+
+        <div class="calendar-summary-exercises">
+          <div class="calendar-summary-empty">
+            No saved workout on this date. Use Edit Workout to log one for this date.
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const workoutName=saved.workoutName || saved.day || "Workout";
+  const workoutColor=workoutColors[workoutName] || "#4f8cff";
+  const snapshot=Array.isArray(saved.routineSnapshot) ? saved.routineSnapshot : [];
+  const savedExercises=Array.isArray(saved.exercises) ? saved.exercises : [];
+
+  // Preserve the saved routine order. If an old log has an exercise that
+  // is not in its snapshot, append it so nothing from history is hidden.
+  const orderedNames=[];
+  snapshot.forEach(ex=>{
+    if(ex && ex.exercise && !orderedNames.includes(ex.exercise)){
+      orderedNames.push(ex.exercise);
+    }
+  });
+  savedExercises.forEach(ex=>{
+    if(ex && ex.exercise && !orderedNames.includes(ex.exercise)){
+      orderedNames.push(ex.exercise);
+    }
+  });
+
+  const exerciseHtml=orderedNames.map(name=>{
+    const snap=snapshot.find(ex=>String(ex.exercise||"")===String(name)) || {};
+    const actual=savedExercises.find(ex=>String(ex.exercise||"")===String(name)) || {};
+    const actualSets=Array.isArray(actual.sets) ? actual.sets : [];
+    const prescribedSets=Number(snap.sets)||0;
+    const maxRecorded=actualSets.reduce((m,s)=>Math.max(m,Number(s.set)||0),0);
+    const setCount=Math.max(prescribedSets,maxRecorded);
+
+    let setsHtml="";
+    for(let s=1;s<=setCount;s++){
+      const set=actualSets.find(item=>Number(item.set)===s);
+      setsHtml+=`
+        <div class="summary-set">
+          <div class="summary-set-label">Set ${s}</div>
+          <div class="summary-set-value">${formatSummarySet(set)}</div>
+        </div>
+      `;
+    }
+
+    if(setCount===0){
+      setsHtml=`
+        <div class="summary-set">
+          <div class="summary-set-label">Sets</div>
+          <div class="summary-set-value">No data recorded</div>
+        </div>
+      `;
+    }
+
+    const prescription=snap.sets && snap.repRange
+      ? `<div class="summary-prescription">${escapeHtml(snap.sets)} sets × ${escapeHtml(snap.repRange)} reps</div>`
+      : "";
+
+    return `
+      <div class="summary-exercise">
+        <div class="summary-exercise-name">${escapeHtml(name)}</div>
+        ${prescription}
+        <div class="summary-sets">${setsHtml}</div>
+      </div>
+    `;
+  }).join("");
+
+  calendarSummary.innerHTML=`
+    <div class="calendar-summary-card">
+      <div class="calendar-summary-head">
+        <div>
+          <div class="calendar-summary-title">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${workoutColor};margin-right:7px;"></span>
+            ${escapeHtml(workoutName)}
+          </div>
+          <div class="calendar-summary-date">${escapeHtml(workoutHeaderDate(selectedDate))}</div>
+          ${workoutHasMissingData(saved) ? '<div class="legacy-explanation" style="color:#ff8c94;">! This workout has missing weight or rep data.</div>' : ''}
+        </div>
+
+        <button class="primary edit-workout-btn" type="button" onclick="openEditWorkoutModal()">
+          Edit Workout
+        </button>
+      </div>
+
+      <div class="calendar-summary-exercises">
+        ${exerciseHtml || '<div class="calendar-summary-empty">No exercise data was recorded.</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function openEditWorkoutModal(){
+  const saved=getLogForDate(selectedDate);
+
+  document.getElementById("editWorkoutModalTitle").textContent=
+    "Are you sure you want to edit?";
+
+  if(saved){
+    const workoutName=saved.workoutName || saved.day || "Workout";
+    document.getElementById("editWorkoutModalMessage").textContent=
+      `Open the saved ${workoutName} workout from ${workoutHeaderDate(selectedDate)} for editing?`;
+  }else{
+    document.getElementById("editWorkoutModalMessage").textContent=
+      `Open ${workoutHeaderDate(selectedDate)} so you can log a workout for this date?`;
+  }
+
+  document.getElementById("editWorkoutModal").classList.add("open");
+}
+
+function closeEditWorkoutModal(){
+  document.getElementById("editWorkoutModal").classList.remove("open");
+}
+
+function confirmEditWorkout(){
+  const saved=getLogForDate(selectedDate);
+
+  if(saved){
+    const workoutName=saved.workoutName || saved.day || currentWorkout;
+
+    if(plan.days[workoutName]){
+      currentWorkout=workoutName;
+    }
+
+    if(Array.isArray(saved.routineSnapshot)){
+      temporaryRoutineKey=dayRoutineKey(selectedDate,currentWorkout);
+      temporaryRoutine=cloneRoutine(saved.routineSnapshot);
+      routineHasUnsavedChanges=false;
+    }
+  }else{
+    // An unsaved historical/future date starts clean from the master template.
+    resetTemporaryRoutine();
+
+    if(!plan.days[currentWorkout]){
+      currentWorkout=Object.keys(plan.days)[0] || "Alpha";
+    }
+  }
+
+  closeEditWorkoutModal();
+  hasUnsavedChanges=false;
+
+  // Calendar Edit is the ONLY way to open a non-today date in Workout.
+  showPage("workout",true);
+}
+
+
+function workoutHasMissingData(log){
+  if(!log) return false;
+
+  const snapshot=Array.isArray(log.routineSnapshot) ? log.routineSnapshot : [];
+  const exercises=Array.isArray(log.exercises) ? log.exercises : [];
+
+  // If there is no snapshot (very old data), use the saved exercise list itself.
+  const expectedExercises=snapshot.length ? snapshot : exercises;
+
+  if(!expectedExercises.length) return true;
+
+  return expectedExercises.some(expected=>{
+    const name=String(expected.exercise||"");
+    const savedEx=exercises.find(ex=>String(ex.exercise||"")===name);
+
+    if(!savedEx) return true;
+
+    const expectedSetCount=Number(expected.sets) || (
+      Array.isArray(savedEx.sets)
+        ? savedEx.sets.reduce((m,s)=>Math.max(m,Number(s.set)||0),0)
+        : 0
+    );
+
+    if(expectedSetCount<=0) return true;
+
+    for(let setNum=1; setNum<=expectedSetCount; setNum++){
+      const savedSet=(savedEx.sets||[]).find(s=>Number(s.set)===setNum);
+
+      if(!savedSet) return true;
+
+      const missingWeight=
+        savedSet.weight===null ||
+        savedSet.weight===undefined ||
+        savedSet.weight==="";
+
+      const missingReps=
+        savedSet.reps===null ||
+        savedSet.reps===undefined ||
+        savedSet.reps==="";
+
+      if(missingWeight || missingReps) return true;
+    }
+
+    return false;
+  });
 }
 
 function renderCalendar(){
@@ -714,35 +2105,43 @@ function renderCalendar(){
     const loggedWorkout=loggedByDate.get(iso);
     const loggedWorkoutName=loggedWorkout?(loggedWorkout.workoutName||loggedWorkout.day||""):"";
     const dumbbellColor=workoutColors[loggedWorkoutName]||"var(--accent)";
+    const hasMissingData=loggedWorkout ? workoutHasMissingData(loggedWorkout) : false;
+
     cell.innerHTML=`<div class="cal-num">${d.getDate()}</div>` +
       (loggedWorkout ? `
-        <div class="dumbbell" style="color:${dumbbellColor}" aria-label="${escapeHtml(loggedWorkoutName)} workout completed" title="${escapeHtml(loggedWorkoutName)} workout completed">
-          <svg viewBox="0 0 64 64" aria-hidden="true">
-            <g fill="currentColor" transform="rotate(-45 32 32)">
-              <!-- thin center bar -->
-              <rect x="14" y="29" width="36" height="6" rx="3"></rect>
-
-              <!-- left inner and outer plates -->
-              <rect x="10" y="20" width="8" height="24" rx="2"></rect>
-              <rect x="4" y="24" width="6" height="16" rx="2"></rect>
-
-              <!-- right inner and outer plates -->
-              <rect x="46" y="20" width="8" height="24" rx="2"></rect>
-              <rect x="54" y="24" width="6" height="16" rx="2"></rect>
-            </g>
-          </svg>
+        <div class="calendar-workout-markers">
+          ${hasMissingData ? `
+            <div class="missing-data-icon"
+                 aria-label="Workout is missing data"
+                 title="Workout is missing weight or rep data">!</div>
+          ` : ""}
+          <div class="dumbbell"
+               style="color:${dumbbellColor}"
+               aria-label="${escapeHtml(loggedWorkoutName)} workout completed"
+               title="${escapeHtml(loggedWorkoutName)} workout completed">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <g fill="${dumbbellColor}" transform="rotate(-45 32 32)">
+                <rect x="14" y="29" width="36" height="6" rx="3"></rect>
+                <rect x="10" y="20" width="8" height="24" rx="2"></rect>
+                <rect x="4" y="24" width="6" height="16" rx="2"></rect>
+                <rect x="46" y="20" width="8" height="24" rx="2"></rect>
+                <rect x="54" y="24" width="6" height="16" rx="2"></rect>
+              </g>
+            </svg>
+          </div>
         </div>` : "");
 
     cell.onclick=()=>{
-      if(iso!==selectedDate && !warnUnsaved()) return;
       selectedDate=iso;
+      resetTemporaryRoutine();
+
       const saved=getLogForDate(selectedDate);
       if(saved && saved.workoutName && plan.days[saved.workoutName]){
         currentWorkout=saved.workoutName;
       }
-      hasUnsavedChanges=false;
-      renderAll();
-      document.getElementById("loggingSection").scrollIntoView({behavior:"smooth",block:"start"});
+
+      renderCalendar();
+      renderCalendarSummary();
     };
 
     calendarGrid.appendChild(cell);
@@ -759,18 +2158,109 @@ document.getElementById("nextMonthBtn").onclick=()=>{
   renderCalendar();
 };
 
+
+document.getElementById("addMasterExerciseBtn").onclick=()=>{
+  if(!plan.days[masterCurrentWorkout]){
+    masterCurrentWorkout=Object.keys(plan.days)[0] || "Alpha";
+  }
+
+  plan.days[masterCurrentWorkout].push({
+    exercise:"New Exercise",
+    sets:3,
+    repRange:"8-12"
+  });
+
+  saveMasterPlan();
+  renderMasterRoutineEditor();
+};
+
 document.getElementById("addExerciseBtn").onclick=()=>{
-  plan.days[currentWorkout].push({exercise:"New Exercise",sets:3,repRange:"8-12"});
-  savePlan();
-  renderAll();
+  resolveWorkoutForDate(selectedDate);
+
+  const routine=getWorkingRoutine(
+    selectedDate,
+    currentWorkout
+  );
+
+  routine.push({
+    exercise:"New Exercise",
+    sets:3,
+    repRange:"8-12"
+  });
+
+  setWorkingRoutine(selectedDate,currentWorkout,routine);
+  refreshDirtyState();
+  renderRoutineEditor();
+  renderLog();
 };
 
 document.getElementById("saveWorkoutBtn").onclick=()=>{
-  const routineSnapshot=JSON.parse(JSON.stringify(plan.days[currentWorkout]||[])); const exercises=[];
-  routineSnapshot.forEach((ex,exIndex)=>{const weights=[...document.querySelectorAll(`input[data-ex="${exIndex}"][data-field="weight"]`)];const sets=weights.map(w=>{const sn=w.dataset.set;const r=document.querySelector(`input[data-ex="${exIndex}"][data-set="${sn}"][data-field="reps"]`);return{set:Number(sn),weight:w.value!==""?Number(w.value):null,reps:r.value!==""?Number(r.value):null};}).filter(s=>s.weight!==null||s.reps!==null);exercises.push({exercise:ex.exercise,sets});});
-  const newLog={date:selectedDate,timestamp:new Date().toISOString(),workoutName:currentWorkout,routineSnapshot,routineSignature:routineSignature(routineSnapshot),exercises};
-  logs=logs.filter(l=>l.date!==selectedDate);logs.push(newLog);saveLogs();hasUnsavedChanges=false;
-  document.getElementById("logStatus").textContent="Workout saved.";setTimeout(()=>document.getElementById("logStatus").textContent="",1400);renderCalendar();renderLog();
+  resolveWorkoutForDate(selectedDate);
+
+  // Commit the exact routine currently on screen.
+  const routineSnapshot=cloneRoutine(
+    getWorkingRoutine(selectedDate,currentWorkout)
+  );
+
+  const exercises=[];
+
+  routineSnapshot.forEach((ex,exIndex)=>{
+    const weights=[
+      ...document.querySelectorAll(
+        `input[data-ex="${exIndex}"][data-field="weight"]`
+      )
+    ];
+
+    const sets=weights.map(w=>{
+      const sn=w.dataset.set;
+      const r=document.querySelector(
+        `input[data-ex="${exIndex}"][data-set="${sn}"][data-field="reps"]`
+      );
+
+      return{
+        set:Number(sn),
+        weight:w.value!==""?Number(w.value):null,
+        reps:r.value!==""?Number(r.value):null
+      };
+    }).filter(s=>s.weight!==null||s.reps!==null);
+
+    exercises.push({
+      exercise:ex.exercise,
+      sets
+    });
+  });
+
+  const newLog={
+    date:selectedDate,
+    timestamp:new Date().toISOString(),
+    workoutName:currentWorkout,
+    routineSnapshot,
+    exercises
+  };
+
+  // Only replace the workout saved on THIS exact calendar date.
+  // Workouts from other dates are untouched.
+  logs=logs.filter(l=>l.date!==selectedDate);
+  logs.push(newLog);
+
+  const savedKey=dayRoutineKey(selectedDate,currentWorkout);
+  dayRoutines[savedKey]=cloneRoutine(routineSnapshot);
+
+  saveLogs();
+  saveDayRoutines();
+
+  resetTemporaryRoutine();
+  hasUnsavedChanges=false;
+
+  document.getElementById("logStatus").textContent="Workout saved.";
+  setTimeout(
+    ()=>document.getElementById("logStatus").textContent="",
+    1400
+  );
+
+  renderCalendar();
+  renderCalendarSummary();
+  renderLog();
 };
 
 
@@ -800,7 +2290,14 @@ function confirmDeleteWorkout(){
   const dateToDelete=selectedDate;
 
   // Remove every log stored on the selected calendar date.
+  const deletedLog=getLogForDate(dateToDelete);
+  const deletedWorkoutName=deletedLog
+    ? (deletedLog.workoutName || deletedLog.day || currentWorkout)
+    : currentWorkout;
+
   logs=logs.filter(log=>String(log.date)!==String(dateToDelete));
+  removeSavedDayRoutine(dateToDelete,deletedWorkoutName);
+  resetTemporaryRoutine();
 
   // Write the new array directly to browser storage.
   localStorage.setItem("workoutLogs",JSON.stringify(logs));
@@ -810,6 +2307,7 @@ function confirmDeleteWorkout(){
 
   // Force every part of the page to refresh from the updated logs array.
   renderCalendar();
+  renderCalendarSummary();
   renderLog();
 
   const status=document.getElementById("logStatus");
@@ -818,6 +2316,13 @@ function confirmDeleteWorkout(){
 }
 
 // Allow tapping the dark background to close the confirmation.
+
+document.getElementById("editWorkoutModal").addEventListener("click",e=>{
+  if(e.target.id==="editWorkoutModal"){
+    closeEditWorkoutModal();
+  }
+});
+
 document.getElementById("deleteModal").addEventListener("click",e=>{
   if(e.target.id==="deleteModal"){
     closeDeleteModal();
@@ -827,15 +2332,27 @@ document.getElementById("deleteModal").addEventListener("click",e=>{
 document.getElementById("clearLogsBtn").onclick=()=>{
   if(confirm("Clear all saved workout history?")){
     logs=[];
+    dayRoutines={};
+    resetTemporaryRoutine();
+
     saveLogs();
+    saveDayRoutines();
+
     renderCalendar();
-    renderLog();
-    document.getElementById("savedStatus").textContent="Saved workout history cleared.";
+    renderCalendarSummary();
+
+    if(currentPage==="workout"){
+      renderRoutineEditor();
+      renderLog();
+    }
+
+    document.getElementById("savedStatus").textContent=
+      "Saved workout history cleared.";
   }
 };
 
 document.getElementById("exportBtn").onclick=()=>{
-  const payload={plan,logs};
+  const payload={plan,logs,dayRoutines};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
@@ -856,12 +2373,16 @@ document.getElementById("importFile").addEventListener("change",async e=>{
     } else if(data.plan && data.plan.days){
       plan=data.plan;
       if(Array.isArray(data.logs)) logs=data.logs;
+      if(data.dayRoutines && typeof data.dayRoutines==="object"){
+        dayRoutines=data.dayRoutines;
+      }
     } else {
       throw new Error("Invalid format");
     }
 
     localStorage.setItem("workoutPlan",JSON.stringify(plan));
     saveLogs();
+    saveDayRoutines();
     currentWorkout=Object.keys(plan.days)[0];
     renderAll();
     document.getElementById("savedStatus").textContent="JSON imported.";
@@ -872,63 +2393,205 @@ document.getElementById("importFile").addEventListener("change",async e=>{
   e.target.value="";
 });
 
-document.querySelectorAll("[data-toggle]").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.getElementById(btn.dataset.toggle).classList.toggle("open");
-  });
-});
 
 function migrateOldPlanIfNeeded(){
   const validNames=["Alpha","Beta","Gamma","Delta","Epsilon"];
-
-  // Update the active routine to the finalized split.
-  // Existing workout logs are preserved.
-  plan={
-    ...defaultPlan,
-    days:JSON.parse(JSON.stringify(defaultPlan.days))
+  const labelMap={
+    "Monday":"Alpha","Strength Focus":"Alpha","Heavy Hitters":"Alpha",
+    "Tuesday":"Beta","Chest, Back & Hamstrings":"Beta","Push Pull Power":"Beta",
+    "Wednesday":"Gamma","Legs & Shoulders":"Gamma","Legs & Delts Lab":"Gamma",
+    "Thursday":"Delta","Upper Body Focus":"Delta","Upper Body Blitz":"Delta",
+    "Friday":"Epsilon","Full Body Hypertrophy":"Epsilon","Full Body Finish":"Epsilon"
   };
+
+  // Migrate old routine names without overwriting current user edits.
+  const migratedDays={};
+  Object.entries(plan.days || {}).forEach(([name,routine])=>{
+    const mapped=labelMap[name] || name;
+    migratedDays[mapped]=routine;
+  });
+
+  validNames.forEach(name=>{
+    if(!migratedDays[name]){
+      migratedDays[name]=JSON.parse(JSON.stringify(defaultPlan.days[name] || []));
+    }
+  });
+
+  plan={...plan,days:migratedDays};
   localStorage.setItem("workoutPlan",JSON.stringify(plan));
 
+  // Backfill older logs with a historical routine snapshot.
   logs=logs.map(l=>{
     const oldName=l.workoutName || l.day || "Workout";
-    const map={
-      "Monday":"Alpha",
-      "Strength Focus":"Alpha",
-      "Heavy Hitters":"Alpha",
+    const workoutName=labelMap[oldName] || oldName;
+    let snapshot=l.routineSnapshot;
 
-      "Tuesday":"Beta",
-      "Chest, Back & Hamstrings":"Beta",
-      "Push Pull Power":"Beta",
+    if(!snapshot){
+      const currentSource=plan.days[workoutName] || defaultPlan.days[workoutName] || [];
+      if(Array.isArray(l.exercises) && l.exercises.length){
+        snapshot=l.exercises.map(savedEx=>{
+          const currentMatch=currentSource.find(ex=>ex.exercise===savedEx.exercise);
+          const defaultMatch=(defaultPlan.days[workoutName] || []).find(ex=>ex.exercise===savedEx.exercise);
+          const source=currentMatch || defaultMatch || {};
+          const savedSets=Array.isArray(savedEx.sets) ? savedEx.sets : [];
+          const maxSet=savedSets.reduce(
+            (max,s)=>Math.max(max,Number(s.set)||0),
+            0
+          );
 
-      "Wednesday":"Gamma",
-      "Legs & Shoulders":"Gamma",
-      "Legs & Delts Lab":"Gamma",
+          return {
+            exercise:savedEx.exercise,
+            sets:Number(source.sets) || maxSet || 1,
+            repRange:String(source.repRange || "Saved")
+          };
+        });
+      } else {
+        snapshot=JSON.parse(JSON.stringify(currentSource));
+      }
+    }
 
-      "Thursday":"Delta",
-      "Upper Body Focus":"Delta",
-      "Upper Body Blitz":"Delta",
-
-      "Friday":"Epsilon",
-      "Full Body Hypertrophy":"Epsilon",
-      "Full Body Finish":"Epsilon"
-    };
-    return {...l,workoutName:map[oldName] || oldName};
+    return {...l,workoutName,routineSnapshot:snapshot};
   });
   saveLogs();
 
-  if(!validNames.includes(currentWorkout)){
-    currentWorkout="Alpha";
+  // Each existing saved workout receives its own independent day routine.
+  logs.forEach(log=>{
+    const workoutName=log.workoutName || log.day;
+    if(!workoutName || !Array.isArray(log.routineSnapshot)) return;
+
+    const key=dayRoutineKey(log.date,workoutName);
+
+    if(!Array.isArray(dayRoutines[key])){
+      dayRoutines[key]=cloneRoutine(log.routineSnapshot);
+    }
+  });
+
+  saveDayRoutines();
+
+  if(labelMap[currentWorkout]) currentWorkout=labelMap[currentWorkout];
+  if(!validNames.includes(currentWorkout)) currentWorkout="Alpha";
+}
+
+
+let currentPage="calendar";
+
+function showPage(pageName,preserveSelectedDate=false){
+  if(pageName==="workout" && !preserveSelectedDate){
+    // Opening Workout from bottom navigation always means TODAY.
+    selectedDate=todayISO();
+    resetTemporaryRoutine();
+    hasUnsavedChanges=false;
+
+    const savedToday=getLogForDate(selectedDate);
+
+    if(savedToday){
+      const savedName=savedToday.workoutName || savedToday.day;
+      if(savedName && plan.days[savedName]){
+        currentWorkout=savedName;
+      }
+    }else if(!plan.days[currentWorkout]){
+      currentWorkout=Object.keys(plan.days)[0] || "Alpha";
+    }
+  }
+
+  document.querySelectorAll(".app-page").forEach(page=>{
+    page.classList.toggle(
+      "active",
+      page.dataset.page===pageName
+    );
+  });
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle(
+      "active",
+      btn.dataset.pageTarget===pageName
+    );
+  });
+
+  currentPage=pageName;
+
+  if(pageName==="calendar"){
+    renderCalendar();
+    renderCalendarSummary();
+    return;
+  }
+
+  if(pageName==="workout"){
+    resolveWorkoutForDate(selectedDate);
+    renderTabs();
+    renderRoutineEditor();
+    renderLog();
+    return;
+  }
+
+  if(pageName==="settings"){
+    renderMasterTabs();
+    renderMasterRoutineEditor();
   }
 }
 
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const target=btn.dataset.pageTarget;
+
+    // Workout button always returns to today's workout.
+    if(target==="workout"){
+      const goToday=()=>showPage("workout",false);
+
+      if(currentPage==="workout"){
+        refreshDirtyState();
+
+        if(hasUnsavedChanges){
+          attemptNavigation(goToday);
+        }else{
+          goToday();
+        }
+      }else{
+        goToday();
+      }
+
+      return;
+    }
+
+    if(target===currentPage) return;
+
+    if(currentPage==="workout"){
+      attemptNavigation(()=>showPage(target));
+    }else{
+      showPage(target);
+    }
+  });
+});
+
 function renderAll(){
-  renderTabs();
-  renderRoutineEditor();
-  renderLog();
-  renderCalendar();
+  // Preserve a calendar-authorized non-today date while editing.
+  showPage(currentPage,currentPage==="workout");
 }
 
-window.addEventListener("beforeunload",e=>{if(!hasUnsavedChanges)return;e.preventDefault();e.returnValue="";});
+
+document.getElementById("unsavedOverlay").addEventListener("click",e=>{
+  if(e.target.id==="unsavedOverlay"){
+    cancelUnsavedNavigation();
+  }
+});
+
+window.addEventListener("beforeunload",e=>{
+  refreshDirtyState();
+  if(!hasUnsavedChanges) return;
+  e.preventDefault();
+  e.returnValue="";
+});
+
+
+const routineToggleBtn=document.getElementById("routineToggleBtn");
+const workoutRoutineSection=document.getElementById("workoutRoutineSection");
+
+if(routineToggleBtn && workoutRoutineSection){
+  routineToggleBtn.addEventListener("click",()=>{
+    const isOpen=workoutRoutineSection.classList.toggle("open");
+    routineToggleBtn.setAttribute("aria-expanded",String(isOpen));
+  });
+}
 
 migrateOldPlanIfNeeded();
 renderAll();
