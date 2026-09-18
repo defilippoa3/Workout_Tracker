@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V25</title>
+<title>Workout Tracker V43</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -436,7 +436,7 @@
   .workout-tab[data-workout="Epsilon"].active{background:var(--epsilon);border-color:var(--epsilon);color:#211b00;}
 
   input::placeholder{color:#788594;opacity:.66;}
-  .previous-note{margin-top:8px;color:var(--muted);font-size:12px;}
+  .previous-note{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.45;opacity:.88;}
 
 
   .unsaved-overlay{
@@ -1203,24 +1203,355 @@
     }
   }
 
+
+  /* V26 Routine editor: horizontal scrolling instead of crushing fields */
+  .routine-editor{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:visible;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    padding-bottom:8px;
+    scrollbar-width:thin;
+  }
+
+  .routine-row,
+  .master-routine-row{
+    width:100%;
+    min-width:790px;
+    grid-template-columns:42px 270px 78px 110px 150px 44px !important;
+    gap:8px !important;
+  }
+
+  .routine-row input[data-edit="exercise"],
+  .master-routine-row input[data-master-edit="exercise"]{
+    min-width:270px;
+  }
+
+  .drag-handle,
+  .master-drag-handle{
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    cursor:grab;
+  }
+
+  .drag-handle:active,
+  .master-drag-handle:active{
+    cursor:grabbing;
+  }
+
+  .routine-row.dragging,
+  .master-routine-row.dragging{
+    opacity:.68;
+    background:rgba(79,140,255,.12);
+    outline:1px solid rgba(79,140,255,.55);
+    border-radius:10px;
+  }
+
+  /* Three equal buttons on top, two equal buttons spanning the same full width below */
+  .workout-tabs{
+    grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(1){
+    grid-column:1 / span 2 !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(2){
+    grid-column:3 / span 2 !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(3){
+    grid-column:5 / span 2 !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(4){
+    grid-column:1 / span 3 !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(5){
+    grid-column:4 / span 3 !important;
+  }
+
+  @media(max-width:680px){
+    .routine-editor{
+      margin-left:0;
+      margin-right:0;
+    }
+
+    .routine-row,
+    .master-routine-row{
+      min-width:760px;
+      grid-template-columns:40px 260px 72px 102px 142px 40px !important;
+      gap:7px !important;
+    }
+
+    .routine-row input[data-edit="exercise"],
+    .master-routine-row input[data-master-edit="exercise"]{
+      min-width:260px;
+    }
+
+    .workout-tabs .workout-tab{
+      min-height:44px;
+    }
+  }
+
+
+  /* V30 mobile editing layout */
+  .routine-editor{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:visible;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    padding:4px 0 12px;
+    scrollbar-width:thin;
+  }
+
+  .routine-row,
+  .master-routine-row{
+    width:max-content !important;
+    min-width:930px !important;
+    grid-template-columns:48px 300px 82px 125px 165px 48px !important;
+    gap:9px !important;
+    align-items:center;
+  }
+
+  .routine-row input[data-edit="exercise"],
+  .master-routine-row input[data-master-edit="exercise"]{
+    width:300px !important;
+    min-width:300px !important;
+  }
+
+  .routine-row input[data-edit="sets"],
+  .master-routine-row input[data-master-edit="sets"]{
+    width:82px !important;
+  }
+
+  .routine-row input[data-edit="repRange"],
+  .master-routine-row input[data-master-edit="repRange"]{
+    width:125px !important;
+  }
+
+  .routine-row input[data-edit="muscleFocus"],
+  .master-routine-row input[data-master-edit="muscleFocus"]{
+    width:165px !important;
+  }
+
+  .drag-handle,
+  .master-drag-handle{
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    cursor:grab;
+  }
+
+  .routine-row.dragging,
+  .master-routine-row.dragging{
+    opacity:.6;
+    outline:2px solid rgba(79,140,255,.5);
+    border-radius:10px;
+  }
+
+  .routine-drag-placeholder{
+    flex:0 0 auto;
+    min-width:930px;
+    border:2px dashed rgba(79,140,255,.45);
+    border-radius:10px;
+    background:rgba(79,140,255,.08);
+    box-sizing:border-box;
+  }
+
+  .routine-scroll-hint{
+    display:none;
+    color:var(--muted);
+    font-size:11px;
+    text-align:right;
+    margin:0 2px 6px;
+  }
+
+  @media(max-width:680px){
+    .routine-scroll-hint{
+      display:block;
+    }
+
+    .routine-editor{
+      width:100%;
+      overflow-x:auto;
+    }
+
+    .routine-row,
+    .master-routine-row{
+      min-width:930px !important;
+      width:930px !important;
+      grid-template-columns:48px 300px 82px 125px 165px 48px !important;
+      gap:9px !important;
+    }
+  }
+
+  /* V30 workout selector: three on top, two equal-width on bottom */
+  .workout-tabs{
+    display:grid !important;
+    grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+    gap:8px !important;
+  }
+
+  .workout-tabs .workout-tab:nth-child(1){grid-column:1 / span 2 !important;}
+  .workout-tabs .workout-tab:nth-child(2){grid-column:3 / span 2 !important;}
+  .workout-tabs .workout-tab:nth-child(3){grid-column:5 / span 2 !important;}
+  .workout-tabs .workout-tab:nth-child(4){grid-column:1 / span 3 !important;}
+  .workout-tabs .workout-tab:nth-child(5){grid-column:4 / span 3 !important;}
+
+  @media(max-width:680px){
+    .workout-tabs{
+      grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+      gap:6px !important;
+    }
+  }
+
+
+  .routine-editor{
+    width:100%;
+    overflow:visible !important;
+    padding:4px 0 12px;
+  }
+
+  .routine-row,
+  .master-routine-row{
+    width:100% !important;
+    min-width:0 !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    padding:10px;
+    margin-bottom:10px;
+    background:var(--panel3);
+    border:1px solid var(--border);
+    border-radius:14px;
+    box-sizing:border-box;
+  }
+
+  .routine-layer-one,
+  .routine-layer-two{
+    display:grid;
+    align-items:center;
+    width:100%;
+    gap:8px;
+  }
+
+  .routine-layer-one{
+    grid-template-columns:42px minmax(180px,2fr) 80px 120px 44px;
+  }
+
+  .routine-layer-two{
+    grid-template-columns:minmax(160px,1fr) minmax(220px,2fr);
+    padding-left:50px;
+  }
+
+  .routine-layer-two input,
+  .routine-layer-two select{
+    width:100%;
+    min-width:0;
+  }
+
+  .routine-notes{
+    min-height:44px;
+  }
+
+  .drag-handle,
+  .master-drag-handle{
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    cursor:grab;
+  }
+
+  .routine-row.dragging,
+  .master-routine-row.dragging{
+    opacity:.65;
+    outline:2px solid rgba(79,140,255,.5);
+  }
+
+  .routine-drag-placeholder{
+    width:100%;
+    min-width:0;
+    border:2px dashed rgba(79,140,255,.45);
+    border-radius:14px;
+    background:rgba(79,140,255,.08);
+    box-sizing:border-box;
+  }
+
+  @media(max-width:680px){
+    .routine-layer-one{
+      grid-template-columns:38px minmax(135px,1fr) 58px 78px 36px;
+      gap:6px;
+    }
+
+    .routine-layer-two{
+      grid-template-columns:1fr;
+      padding-left:44px;
+    }
+
+    .routine-layer-two input{
+      min-height:42px;
+    }
+  }
+
+.muscle-group-list{display:grid;gap:8px}.muscle-group-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel3);border:1px solid var(--border);border-radius:11px;padding:10px 12px}.muscle-group-name{font-weight:800}.muscle-group-add{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}@media(max-width:680px){.muscle-group-add{grid-template-columns:1fr}}
+
+  .muscle-group-item{
+    cursor:grab;
+    touch-action:none;
+  }
+  .muscle-group-item-main{
+    display:flex;
+    align-items:center;
+    min-width:0;
+  }
+  .muscle-group-name{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+
+  .invalid-set{border-color:var(--danger) !important;box-shadow:0 0 0 1px rgba(255,91,102,.22);}
+
+
+  .invalid-set{
+    border-color:var(--danger) !important;
+    box-shadow:0 0 0 1px rgba(255,91,102,.25);
+  }
+
+  .invalid-sets-card h3{
+    color:#ff8c94;
+  }
+
+
+  .unsaved-actions,
+  .warning-action-stack{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:9px !important;
+    width:100%;
+    max-width:300px;
+    margin:20px auto 0 !important;
+  }
+
+  .unsaved-actions button,
+  .warning-action-stack button{
+    width:100%;
+    min-height:42px;
+    margin:0 !important;
+  }
+
 </style>
 </head>
 <body>
 <div class="app">
   <datalist id="exerciseLibrary"></datalist>
-  <datalist id="muscleFocusOptions">
-    <option value="Chest"></option>
-    <option value="Back"></option>
-    <option value="Shoulders"></option>
-    <option value="Biceps"></option>
-    <option value="Triceps"></option>
-    <option value="Quads"></option>
-    <option value="Hamstrings"></option>
-    <option value="Glutes"></option>
-    <option value="Calves"></option>
-    <option value="Abs"></option>
-    <option value="Other"></option>
-  </datalist>
+  <datalist id="muscleFocusOptions"></datalist>
 
   <header class="hero">
     <h1>Workout Tracker</h1>
@@ -1274,7 +1605,7 @@
               </div>
               <button id="addExerciseBtn" type="button">+ Add Exercise</button>
             </div>
-            <div class="routine-editor" id="routineEditor"></div>
+            <div class="routine-scroll-hint">Swipe left/right to see all fields</div><div class="routine-editor" id="routineEditor"></div>
             <div class="status" id="routineStatus"></div>
           </div>
         </div>
@@ -1369,8 +1700,8 @@
     <!-- SETTINGS PAGE -->
     <section class="app-page" id="settingsPage" data-page="settings">
       <div class="page-card">
-        <div class="page-title">Settings</div>
-        <div class="settings-card" id="masterTemplatesCard">
+        <div class="page-title">Configuration</div>
+                <div class="settings-card" id="masterTemplatesCard">
           <div class="settings-title">Master Routine Templates</div>
           <div class="saved-note" style="margin-top:0;margin-bottom:14px;">
             These are the default Alpha through Epsilon routines for future workout days.
@@ -1384,13 +1715,27 @@
               <div class="routine-title" id="masterRoutineTitle">Alpha</div>
               <div class="muted">Edit the default routine for future workouts.</div>
             </div>
-            <button id="addMasterExerciseBtn" type="button">+ Add Exercise</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button id="addMasterExerciseBtn" type="button">+ Add Exercise</button>
+              <button id="saveMasterRoutineBtn" type="button" class="primary">Save Master Template</button>
+            </div>
           </div>
 
-          <div class="routine-editor" id="masterRoutineEditor"></div>
+          <div class="routine-scroll-hint">Swipe left/right to see all fields</div><div class="routine-editor" id="masterRoutineEditor"></div>
           <div class="status" id="masterRoutineStatus"></div>
         </div>
 
+        <div style="height:16px;"></div>
+<div class="settings-card">
+          <div class="settings-title">Muscle Groups</div>
+          <div class="saved-note" style="margin-top:0;margin-bottom:14px;">Add as many muscle groups as you want. These become the only muscle-group choices available in Routine editors.</div>
+          <div class="muscle-group-add">
+            <input id="newMuscleGroupInput" type="text" placeholder="Add muscle group" maxlength="40">
+            <button id="addMuscleGroupBtn" type="button">+ Add</button>
+          </div>
+          <div id="muscleGroupList" class="muscle-group-list"></div>
+          <div class="status" id="muscleGroupStatus"></div>
+        </div>
         <div style="height:16px;"></div>
 
         <div class="settings-card">
@@ -1444,14 +1789,9 @@
       <span class="nav-label">Progress</span>
     </button>
 
-    <button class="nav-btn" type="button" data-page-target="settings" aria-label="Settings">
-      <span class="nav-icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 8.5A3.5 3.5 0 1 0 12 15.5A3.5 3.5 0 1 0 12 8.5Z" fill="none" stroke="currentColor" stroke-width="2"/>
-          <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.4 1a7 7 0 0 0-2.1-1.2L14 3h-4l-.4 2.7a7 7 0 0 0-2.1 1.2l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 2.1 1.2L10 21h4l.4-2.7a7 7 0 0 0 2.1-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-        </svg>
-      </span>
-      <span class="nav-label">Settings</span>
+    <button class="nav-btn" type="button" data-page-target="settings" aria-label="Configuration">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0 0-3l-1-1a2.1 2.1 0 0 0-3 0L4 16v4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 6l4 4M4 20l4-1M5 4h6M5 8h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+      <span class="nav-label">Configuration</span>
     </button>
   </nav>
 
@@ -1484,18 +1824,24 @@
       <p>You have unsaved data that may be lost forever.</p>
       <div class="unsaved-actions">
         <button type="button" onclick="cancelUnsavedNavigation()">Stay Here</button>
+        <button type="button" class="primary" onclick="saveAndConfirmUnsavedNavigation()">Leave With Saving</button>
         <button type="button" class="danger" onclick="confirmUnsavedNavigation()">Leave Without Saving</button>
       </div>
     </div>
   </div>
 </div>
 <script>
-const defaultPlan = {"programName": "5-Day Push Pull Arms+Abs Upper Legs", "days": {"Alpha": [{"exercise": "Bench Press", "sets": 3, "repRange": "6-8", "muscleFocus": "Chest"}, {"exercise": "Incline Dumbbell Press", "sets": 3, "repRange": "8-10", "muscleFocus": "Chest"}, {"exercise": "Pec Deck or Cable Fly", "sets": 2, "repRange": "10-15", "muscleFocus": "Chest"}, {"exercise": "Cable Lateral Raise", "sets": 3, "repRange": "12-15", "muscleFocus": "Shoulders"}, {"exercise": "Triceps Pushdown", "sets": 3, "repRange": "10-15", "muscleFocus": "Triceps"}], "Beta": [{"exercise": "Barbell Row", "sets": 3, "repRange": "6-8", "muscleFocus": "Back"}, {"exercise": "Wide-Grip Lat Pulldown", "sets": 3, "repRange": "8-10", "muscleFocus": "Back"}, {"exercise": "Seated Cable Row", "sets": 3, "repRange": "8-12", "muscleFocus": "Back"}, {"exercise": "Reverse Pec Deck", "sets": 2, "repRange": "12-15", "muscleFocus": "Shoulders"}, {"exercise": "Dumbbell or Cable Curl", "sets": 3, "repRange": "8-12", "muscleFocus": "Biceps"}], "Gamma": [{"exercise": "EZ-Bar Curl", "sets": 3, "repRange": "8-10", "muscleFocus": "Biceps"}, {"exercise": "Skull Crushers", "sets": 3, "repRange": "8-10", "muscleFocus": "Triceps"}, {"exercise": "Incline Dumbbell Curl", "sets": 3, "repRange": "10-12", "muscleFocus": "Biceps"}, {"exercise": "Rope Triceps Pushdown", "sets": 3, "repRange": "10-15", "muscleFocus": "Triceps"}, {"exercise": "Hanging Leg Raise", "sets": 3, "repRange": "10-15", "muscleFocus": "Abs"}, {"exercise": "Cable Crunch", "sets": 3, "repRange": "10-15", "muscleFocus": "Abs"}], "Delta": [{"exercise": "Incline Machine Press", "sets": 3, "repRange": "8-12", "muscleFocus": "Chest"}, {"exercise": "Chest-Supported Row", "sets": 3, "repRange": "8-12", "muscleFocus": "Back"}, {"exercise": "Narrow-Grip Lat Pulldown", "sets": 3, "repRange": "8-12", "muscleFocus": "Back"}, {"exercise": "Seated Dumbbell Shoulder Press", "sets": 3, "repRange": "8-10", "muscleFocus": "Shoulders"}, {"exercise": "Pec Deck", "sets": 2, "repRange": "10-15", "muscleFocus": "Chest"}, {"exercise": "Cable Lateral Raise", "sets": 2, "repRange": "12-20", "muscleFocus": "Shoulders"}], "Epsilon": [{"exercise": "Back Squat", "sets": 3, "repRange": "5-8", "muscleFocus": "Quads"}, {"exercise": "Romanian Deadlift", "sets": 3, "repRange": "6-10", "muscleFocus": "Hamstrings"}, {"exercise": "Leg Press", "sets": 3, "repRange": "8-12", "muscleFocus": "Quads"}, {"exercise": "Leg Curl", "sets": 3, "repRange": "10-15", "muscleFocus": "Hamstrings"}, {"exercise": "Leg Extension", "sets": 2, "repRange": "10-15", "muscleFocus": "Quads"}, {"exercise": "Standing Calf Raise", "sets": 3, "repRange": "10-15", "muscleFocus": "Calves"}]}};
+const defaultPlan = {"programName": "5-Day Push Pull Arms+Abs Upper Legs", "days": {"Alpha": [{"exercise": "Bench Press", "sets": 3, "repRange": "6-8", "muscleFocus": "Chest", "notes": ""}, {"exercise": "Incline Dumbbell Press", "sets": 3, "repRange": "8-10", "muscleFocus": "Chest", "notes": ""}, {"exercise": "Pec Deck or Cable Fly", "sets": 2, "repRange": "10-15", "muscleFocus": "Chest", "notes": ""}, {"exercise": "Cable Lateral Raise", "sets": 3, "repRange": "12-15", "muscleFocus": "Shoulders", "notes": ""}, {"exercise": "Triceps Pushdown", "sets": 3, "repRange": "10-15", "muscleFocus": "Triceps", "notes": ""}], "Beta": [{"exercise": "Barbell Row", "sets": 3, "repRange": "6-8", "muscleFocus": "Back", "notes": ""}, {"exercise": "Wide-Grip Lat Pulldown", "sets": 3, "repRange": "8-10", "muscleFocus": "Back", "notes": ""}, {"exercise": "Seated Cable Row", "sets": 3, "repRange": "8-12", "muscleFocus": "Back", "notes": ""}, {"exercise": "Reverse Pec Deck", "sets": 2, "repRange": "12-15", "muscleFocus": "Shoulders", "notes": ""}, {"exercise": "Dumbbell or Cable Curl", "sets": 3, "repRange": "8-12", "muscleFocus": "Biceps", "notes": ""}], "Gamma": [{"exercise": "EZ-Bar Curl", "sets": 3, "repRange": "8-10", "muscleFocus": "Biceps", "notes": ""}, {"exercise": "Skull Crushers", "sets": 3, "repRange": "8-10", "muscleFocus": "Triceps", "notes": ""}, {"exercise": "Incline Dumbbell Curl", "sets": 3, "repRange": "10-12", "muscleFocus": "Biceps", "notes": ""}, {"exercise": "Rope Triceps Pushdown", "sets": 3, "repRange": "10-15", "muscleFocus": "Triceps", "notes": ""}, {"exercise": "Hanging Leg Raise", "sets": 3, "repRange": "10-15", "muscleFocus": "Abs", "notes": ""}, {"exercise": "Cable Crunch", "sets": 3, "repRange": "10-15", "muscleFocus": "Abs", "notes": ""}], "Delta": [{"exercise": "Incline Machine Press", "sets": 3, "repRange": "8-12", "muscleFocus": "Chest", "notes": ""}, {"exercise": "Chest-Supported Row", "sets": 3, "repRange": "8-12", "muscleFocus": "Back", "notes": ""}, {"exercise": "Narrow-Grip Lat Pulldown", "sets": 3, "repRange": "8-12", "muscleFocus": "Back", "notes": ""}, {"exercise": "Seated Dumbbell Shoulder Press", "sets": 3, "repRange": "8-10", "muscleFocus": "Shoulders", "notes": ""}, {"exercise": "Pec Deck", "sets": 2, "repRange": "10-15", "muscleFocus": "Chest", "notes": ""}, {"exercise": "Cable Lateral Raise", "sets": 2, "repRange": "12-20", "muscleFocus": "Shoulders", "notes": ""}], "Epsilon": [{"exercise": "Back Squat", "sets": 3, "repRange": "5-8", "muscleFocus": "Quads", "notes": ""}, {"exercise": "Romanian Deadlift", "sets": 3, "repRange": "6-10", "muscleFocus": "Hamstrings", "notes": ""}, {"exercise": "Leg Press", "sets": 3, "repRange": "8-12", "muscleFocus": "Quads", "notes": ""}, {"exercise": "Leg Curl", "sets": 3, "repRange": "10-15", "muscleFocus": "Hamstrings", "notes": ""}, {"exercise": "Leg Extension", "sets": 2, "repRange": "10-15", "muscleFocus": "Quads", "notes": ""}, {"exercise": "Standing Calf Raise", "sets": 3, "repRange": "10-15", "muscleFocus": "Calves", "notes": ""}]}};
 
 let plan = JSON.parse(localStorage.getItem("workoutPlan")) || defaultPlan;
 let logs = JSON.parse(localStorage.getItem("workoutLogs")) || [];
 let dayRoutines = JSON.parse(localStorage.getItem("dayRoutines")) || {};
 let masterCurrentWorkout = "Alpha";
+let masterWorkingRoutine = null;
+let masterWorkingWorkout = null;
+let masterHasUnsavedChanges = false;
+let configurationHasUnsavedChanges = false;
+
 
 // Unsaved routine edits live only in memory.
 // They are discarded when you leave without saving or reload the page.
@@ -1553,12 +1899,14 @@ function attemptNavigation(action){
   }
 
   pendingNavigation=action;
-  document.getElementById("unsavedOverlay").classList.add("open");
-}
 
-function cancelUnsavedNavigation(){
-  pendingNavigation=null;
-  document.getElementById("unsavedOverlay").classList.remove("open");
+  // Invalid Sets require the user to fix the value before leaving.
+  // Therefore, the normal Save-and-Leave option is not offered.
+  if(hasInvalidSetCounts()){
+    document.getElementById("invalidSetsOverlay").classList.add("open");
+  }else{
+    document.getElementById("unsavedOverlay").classList.add("open");
+  }
 }
 
 function confirmUnsavedNavigation(){
@@ -1569,6 +1917,45 @@ function confirmUnsavedNavigation(){
   temporaryRoutine=null;
   temporaryRoutineKey=null;
   document.getElementById("unsavedOverlay").classList.remove("open");
+  if(action) action();
+}
+
+function cancelInvalidSetsNavigation(){
+  pendingNavigation=null;
+  document.getElementById("invalidSetsOverlay").classList.remove("open");
+}
+
+function confirmInvalidSetsNavigation(){
+  // Do not save or navigate. The Sets value must be fixed first.
+  document.getElementById("invalidSetsOverlay").classList.remove("open");
+
+  const status=document.getElementById("logStatus");
+  status.textContent=
+    "Fix the Sets value so every exercise has at least 1 set before leaving.";
+  setTimeout(()=>status.textContent="",2200);
+}
+
+function saveAndConfirmUnsavedNavigation(){
+  if(hasInvalidSetCounts()){
+    document.getElementById("unsavedOverlay").classList.remove("open");
+    document.getElementById("invalidSetsOverlay").classList.add("open");
+    return;
+  }
+
+  const action=pendingNavigation;
+
+  // Save the workout currently on screen before performing the pending navigation.
+  const saved=saveCurrentWorkout();
+
+  if(!saved){
+    return;
+  }
+
+  pendingNavigation=null;
+  hasUnsavedChanges=false;
+  routineHasUnsavedChanges=false;
+  document.getElementById("unsavedOverlay").classList.remove("open");
+
   if(action) action();
 }
 
@@ -1703,45 +2090,40 @@ function resetTemporaryRoutine(){
   routineHasUnsavedChanges=false;
 }
 
-function getWorkingRoutine(date,workoutName){
+function initializeWorkingRoutine(date,workoutName){
+  const key=dayRoutineKey(date,workoutName);
   const saved=getLogForDate(date);
 
-  // SAVED DAY: always use that day's saved routine snapshot.
+  // Already loaded for this exact date/routine. Keep the same working copy
+  // so edits remain visible when Record Workout re-renders.
+  if(temporaryRoutineKey===key && Array.isArray(temporaryRoutine)){
+    return temporaryRoutine;
+  }
+
+  // Saved workout: load that day's exact routine snapshot into memory.
   if(
     saved &&
     (saved.workoutName || saved.day)===workoutName &&
     Array.isArray(saved.routineSnapshot)
   ){
-    return cloneRoutine(saved.routineSnapshot);
-  }
-
-  // UNSAVED DAY: use an in-memory copy of the CURRENT master template.
-  // Nothing is written to localStorage until Save Workout is pressed.
-  const key=dayRoutineKey(date,workoutName);
-
-  if(temporaryRoutineKey!==key || !Array.isArray(temporaryRoutine)){
     temporaryRoutineKey=key;
-    temporaryRoutine=cloneRoutine(plan.days[workoutName] || []);
+    temporaryRoutine=cloneRoutine(saved.routineSnapshot);
     routineHasUnsavedChanges=false;
+    return temporaryRoutine;
   }
 
+  // Unsaved workout: load a one-time copy of the CURRENT master template.
+  temporaryRoutineKey=key;
+  temporaryRoutine=cloneRoutine(plan.days[workoutName] || []);
+  routineHasUnsavedChanges=false;
   return temporaryRoutine;
 }
 
+function getWorkingRoutine(date,workoutName){
+  return initializeWorkingRoutine(date,workoutName);
+}
+
 function setWorkingRoutine(date,workoutName,routine){
-  const saved=getLogForDate(date);
-
-  if(
-    saved &&
-    (saved.workoutName || saved.day)===workoutName
-  ){
-    // Editing a saved workout is still only committed when Save Workout is pressed.
-    temporaryRoutineKey=dayRoutineKey(date,workoutName);
-    temporaryRoutine=cloneRoutine(routine);
-    routineHasUnsavedChanges=true;
-    return;
-  }
-
   temporaryRoutineKey=dayRoutineKey(date,workoutName);
   temporaryRoutine=cloneRoutine(routine);
   routineHasUnsavedChanges=true;
@@ -1753,6 +2135,99 @@ function removeSavedDayRoutine(date,workoutName){
 }
 
 
+let muscleGroups=JSON.parse(localStorage.getItem("muscleGroups")||"null");
+function initialMuscleGroups(){const values=[];Object.values(plan.days||{}).forEach(r=>(r||[]).forEach(ex=>{const v=String(ex.muscleFocus||"").trim();if(v&&!values.includes(v))values.push(v);}));return values.length?values:["Chest","Back","Shoulders","Biceps","Triceps","Quads","Hamstrings","Glutes","Calves","Abs"];}
+if(!Array.isArray(muscleGroups)||!muscleGroups.length){muscleGroups=initialMuscleGroups();localStorage.setItem("muscleGroups",JSON.stringify(muscleGroups));}
+function saveMuscleGroups(){localStorage.setItem("muscleGroups",JSON.stringify(muscleGroups));}
+function renderMuscleFocusOptions(){const root=document.getElementById("muscleFocusOptions");if(root)root.innerHTML=muscleGroups.map(n=>`<option value="${escapeAttr(n)}"></option>`).join("");}
+function configuredMuscleValue(v){const x=String(v||"").trim();return muscleGroups.find(n=>n.toLowerCase()===x.toLowerCase())||muscleGroups[0]||"";}
+function saveMuscleGroups(){
+  localStorage.setItem("muscleGroups",JSON.stringify(muscleGroups));
+}
+
+function renderMuscleFocusOptions(){
+  const root=document.getElementById("muscleFocusOptions");
+  if(root){
+    root.innerHTML=muscleGroups.map(name=>
+      `<option value="${escapeAttr(name)}"></option>`
+    ).join("");
+  }
+}
+
+function configuredMuscleValue(value){
+  const entered=String(value||"").trim();
+  const match=muscleGroups.find(
+    name=>name.toLowerCase()===entered.toLowerCase()
+  );
+  return match || muscleGroups[0] || "";
+}
+
+function renderMuscleGroups(){
+  const root=document.getElementById("muscleGroupList");
+  if(!root) return;
+
+  root.innerHTML=muscleGroups.length
+    ? muscleGroups.map((name,i)=>`
+        <div class="muscle-group-item">
+          <span class="muscle-group-name">${escapeHtml(name)}</span>
+          <button type="button" class="danger" data-muscle-remove="${i}" title="Remove muscle group">×</button>
+        </div>
+      `).join("")
+    : '<div class="muscle-group-empty">No muscle groups configured yet.</div>';
+
+  root.querySelectorAll("[data-muscle-remove]").forEach(btn=>{
+    btn.onclick=()=>{
+      if(muscleGroups.length<=1){
+        document.getElementById("muscleGroupStatus").textContent=
+          "Keep at least one muscle group.";
+        return;
+      }
+
+      const removed=muscleGroups.splice(
+        Number(btn.dataset.muscleRemove),1
+      )[0];
+
+      const fallback=muscleGroups[0];
+
+      Object.values(plan.days||{}).forEach(routine=>{
+        (routine||[]).forEach(ex=>{
+          if(String(ex.muscleFocus||"").trim()===removed){
+            ex.muscleFocus=fallback;
+          }
+        });
+      });
+
+      logs.forEach(log=>{
+        (log.routineSnapshot||[]).forEach(ex=>{
+          if(String(ex.muscleFocus||"").trim()===removed){
+            ex.muscleFocus=fallback;
+          }
+        });
+      });
+
+      saveMuscleGroups();
+      localStorage.setItem("workoutPlan",JSON.stringify(plan));
+      saveLogs();
+
+      renderMuscleGroups();
+      renderMuscleFocusOptions();
+      renderMasterRoutineEditor();
+
+      if(currentPage==="workout"){
+        renderRoutineEditor();
+      }
+
+      document.getElementById("muscleGroupStatus").textContent=
+        `"${removed}" removed.`;
+      setTimeout(
+        ()=>document.getElementById("muscleGroupStatus").textContent="",
+        1600
+      );
+    };
+  });
+}
+
+function addMuscleGroup(){const input=document.getElementById("newMuscleGroupInput"),status=document.getElementById("muscleGroupStatus"),name=String(input.value||"").trim();if(!name){status.textContent="Enter a muscle group.";return;}if(muscleGroups.some(x=>x.toLowerCase()===name.toLowerCase())){status.textContent="That muscle group already exists.";return;}muscleGroups.unshift(name);saveMuscleGroups();input.value="";renderMuscleGroups();renderMuscleFocusOptions();status.textContent=`"${name}" added.`;setTimeout(()=>status.textContent="",1400);}
 function inferMuscleFocus(name){
   const n=String(name||"").trim().toLowerCase();
 
@@ -1781,6 +2256,9 @@ function ensureMuscleFocusMetadata(){
     (routine||[]).forEach(ex=>{
       if(!ex.muscleFocus){
         ex.muscleFocus=inferMuscleFocus(ex.exercise);
+      }
+      if(ex.notes===undefined || ex.notes===null){
+        ex.notes="";
       }
     });
   });
@@ -2279,6 +2757,15 @@ function renderTabs(){
   });
 }
 
+function updateCurrentSetFieldVisual(i,value){
+  const inputs=routineEditor.querySelectorAll('[data-edit="sets"]');
+  const input=[...inputs].find(el=>Number(el.dataset.i)===Number(i));
+  if(!input) return;
+
+  const n=Number(value);
+  input.classList.toggle("invalid-set",!Number.isFinite(n)||n<1);
+}
+
 function renderRoutineEditor(){
   resolveWorkoutForDate(selectedDate);
 
@@ -2294,37 +2781,65 @@ function renderRoutineEditor(){
     row.draggable=true;
 
     row.innerHTML=`
-      <button type="button" class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
-      <input value="${escapeAttr(ex.exercise)}" data-edit="exercise" data-i="${idx}" aria-label="Exercise name">
-      <input type="number" min="1" value="${ex.sets}" data-edit="sets" data-i="${idx}" aria-label="Sets">
-      <input value="${escapeAttr(ex.repRange)}" data-edit="repRange" data-i="${idx}" aria-label="Rep range">
-      <input value="${escapeAttr(ex.muscleFocus || inferMuscleFocus(ex.exercise))}" list="muscleFocusOptions" data-edit="muscleFocus" data-i="${idx}" aria-label="Muscle focus" placeholder="Muscle">
-      <button type="button" class="danger" data-remove="${idx}" title="Remove">×</button>
+      <div class="routine-layer-one">
+        <button type="button" class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
+        <input value="${escapeAttr(ex.exercise)}" data-edit="exercise" data-i="${idx}" aria-label="Exercise name" placeholder="Exercise">
+        <input type="text" inputmode="numeric" value="${Number(ex.sets)>0 ? escapeAttr(ex.sets) : ""}" data-edit="sets" data-i="${idx}" aria-label="Sets" placeholder="Sets" class="${Number(ex.sets)<1 ? "invalid-set" : ""}">
+        <input value="${escapeAttr(ex.repRange)}" data-edit="repRange" data-i="${idx}" aria-label="Reps per set" placeholder="Reps per set">
+        <button type="button" class="danger" data-remove="${idx}" title="Remove">×</button>
+      </div>
+
+      <div class="routine-layer-two">
+        <select data-edit="muscleFocus" data-i="${idx}" aria-label="Muscle group">${muscleGroups.map(name=>`<option value="${escapeAttr(name)}" ${configuredMuscleValue(ex.muscleFocus)===name?"selected":""}>${escapeHtml(name)}</option>`).join("")}</select>
+        <input class="routine-notes" value="${escapeAttr(ex.notes || "")}" data-edit="notes" data-i="${idx}" aria-label="Notes" placeholder="Notes">
+      </div>
     `;
 
     routineEditor.appendChild(row);
   });
 
   routineEditor.querySelectorAll("[data-edit]").forEach(input=>{
-    input.addEventListener("change",e=>{
+    const updateRoutineField=e=>{
       const i=Number(e.target.dataset.i);
       const field=e.target.dataset.edit;
       const routine=getWorkingRoutine(selectedDate,currentWorkout);
 
-      routine[i][field]=
-        field==="sets"
-          ? Math.max(1,Number(e.target.value)||1)
-          : e.target.value;
+      if(!routine[i]) return;
 
-      setWorkingRoutine(selectedDate,currentWorkout,routine);
-      refreshDirtyState();
+      if(field==="sets"){
+        const raw=String(e.target.value||"").trim();
+        const cleaned=raw.replace(/[^0-9]/g,"");
+        const next=cleaned==="" ? 0 : parseInt(cleaned,10);
 
-      const status=document.getElementById("routineStatus");
-      status.textContent="Temporary change. Save Workout to keep it.";
-      setTimeout(()=>status.textContent="",1600);
+        routine[i].sets=Number.isFinite(next) ? next : 0;
+        updateCurrentSetFieldVisual(i,routine[i].sets);
+        setWorkingRoutine(selectedDate,currentWorkout,routine);
+        routineHasUnsavedChanges=true;
+        refreshDirtyState();
 
-      renderLog();
-    });
+        // Do not rerender the Routine editor while the Sets input has focus.
+        // That was causing iPhone to jump/scroll away from the field being edited.
+        renderLog();
+      }else{
+        routine[i][field]=e.target.value;
+
+        setWorkingRoutine(selectedDate,currentWorkout,routine);
+        routineHasUnsavedChanges=true;
+        refreshDirtyState();
+
+        const status=document.getElementById("routineStatus");
+        status.textContent="Temporary change. Save Workout to keep it.";
+        setTimeout(()=>status.textContent="",1600);
+
+        renderLog();
+      }
+    };
+
+    if(input.dataset.edit==="sets"){
+      input.addEventListener("input",updateRoutineField);
+    }else{
+      input.addEventListener("change",updateRoutineField);
+    }
   });
 
   routineEditor.querySelectorAll("[data-remove]").forEach(btn=>{
@@ -2340,6 +2855,7 @@ function renderRoutineEditor(){
   });
 
   setupRoutineDragAndDrop();
+  routineEditor.scrollLeft=0;
 }
 
 function commitRoutineOrderFromDom(){
@@ -2353,20 +2869,27 @@ function commitRoutineOrderFromDom(){
 
   const reordered=order.map(i=>oldRoutine[i]);
   setWorkingRoutine(selectedDate,currentWorkout,reordered);
+  routineHasUnsavedChanges=true;
   refreshDirtyState();
+
+  const status=document.getElementById("routineStatus");
+  status.textContent="Temporary reorder. Save Workout to keep it.";
+  setTimeout(()=>status.textContent="",1600);
 
   renderRoutineEditor();
   renderLog();
 }
 
 function setupRoutineDragAndDrop(){
-  let nativeDragged=null;
+  const rows=[...routineEditor.querySelectorAll(".routine-row")];
 
-  routineEditor.querySelectorAll(".routine-row").forEach(row=>{
+  // Desktop mouse drag.
+  let draggedRow=null;
+
+  rows.forEach(row=>{
     row.addEventListener("dragstart",e=>{
-      nativeDragged=row;
+      draggedRow=row;
       row.classList.add("dragging");
-
       if(e.dataTransfer){
         e.dataTransfer.effectAllowed="move";
         e.dataTransfer.setData("text/plain",row.dataset.originalIndex||"");
@@ -2375,86 +2898,168 @@ function setupRoutineDragAndDrop(){
 
     row.addEventListener("dragover",e=>{
       e.preventDefault();
-      if(!nativeDragged || nativeDragged===row) return;
+      if(!draggedRow || draggedRow===row) return;
 
       const rect=row.getBoundingClientRect();
       const after=e.clientY>rect.top+rect.height/2;
-      routineEditor.insertBefore(nativeDragged,after?row.nextSibling:row);
+      routineEditor.insertBefore(draggedRow,after?row.nextSibling:row);
     });
 
     row.addEventListener("dragend",()=>{
-      row.classList.remove("dragging");
-      nativeDragged=null;
+      draggedRow?.classList.remove("dragging");
+      draggedRow=null;
       commitRoutineOrderFromDom();
     });
   });
 
-  let pointerRow=null;
-  let activePointerId=null;
-
+  // Mobile touch drag using a long press on the handle.
   routineEditor.querySelectorAll(".drag-handle").forEach(handle=>{
-    handle.addEventListener("pointerdown",e=>{
-      if(e.pointerType==="mouse") return;
+    let row=null;
+    let touchId=null;
+    let timer=null;
+    let dragging=false;
+    let placeholder=null;
+    let startX=0;
+    let startY=0;
 
-      pointerRow=handle.closest(".routine-row");
-      activePointerId=e.pointerId;
-      pointerRow.classList.add("dragging");
-      handle.setPointerCapture?.(e.pointerId);
-      e.preventDefault();
-    });
+    const getTouch=e=>{
+      return [...e.touches,...e.changedTouches]
+        .find(t=>t.identifier===touchId) || null;
+    };
 
-    handle.addEventListener("pointermove",e=>{
-      if(!pointerRow || e.pointerId!==activePointerId) return;
+    const cleanup=()=>{
+      clearTimeout(timer);
+      document.removeEventListener("touchmove",move,{passive:false});
+      document.removeEventListener("touchend",end,{passive:false});
+      document.removeEventListener("touchcancel",cancel,{passive:false});
+      timer=null;
+    };
 
-      const target=
-        document.elementFromPoint(e.clientX,e.clientY)?.closest(".routine-row");
+    const begin=()=>{
+      if(!row || dragging) return;
 
-      if(!target || target===pointerRow || target.parentElement!==routineEditor){
+      dragging=true;
+      row.classList.add("dragging");
+      row.style.pointerEvents="none";
+
+      placeholder=document.createElement("div");
+      placeholder.className="routine-drag-placeholder";
+      placeholder.style.height=`${row.offsetHeight}px`;
+
+      row.parentElement.insertBefore(placeholder,row);
+      row.parentElement.removeChild(row);
+      row.parentElement.appendChild(row);
+    };
+
+    const move=e=>{
+      if(!row) return;
+
+      const touch=getTouch(e);
+      if(!touch) return;
+
+      if(!dragging){
+        const dx=Math.abs(touch.clientX-startX);
+        const dy=Math.abs(touch.clientY-startY);
+
+        if(dx>8 || dy>8){
+          clearTimeout(timer);
+          cleanup();
+          row=null;
+          touchId=null;
+        }
         return;
       }
 
+      e.preventDefault();
+
+      const target=document
+        .elementFromPoint(touch.clientX,touch.clientY)
+        ?.closest(".routine-row");
+
+      if(!target || target===row || target.parentElement!==routineEditor) return;
+
       const rect=target.getBoundingClientRect();
-      const after=e.clientY>rect.top+rect.height/2;
-      routineEditor.insertBefore(pointerRow,after?target.nextSibling:target);
-      e.preventDefault();
-    });
+      const after=touch.clientY>rect.top+rect.height/2;
 
-    const finish=e=>{
-      if(!pointerRow || e.pointerId!==activePointerId) return;
-
-      pointerRow.classList.remove("dragging");
-
-      try{
-        handle.releasePointerCapture?.(e.pointerId);
-      }catch(_){}
-
-      pointerRow=null;
-      activePointerId=null;
-      commitRoutineOrderFromDom();
-      e.preventDefault();
+      routineEditor.insertBefore(
+        placeholder,
+        after?target.nextSibling:target
+      );
     };
 
-    handle.addEventListener("pointerup",finish);
-    handle.addEventListener("pointercancel",finish);
+    const finish=()=>{
+      if(!row) return;
+
+      clearTimeout(timer);
+      cleanup();
+
+      if(!dragging){
+        row=null;
+        touchId=null;
+        return;
+      }
+
+      row.style.pointerEvents="";
+      row.classList.remove("dragging");
+      routineEditor.insertBefore(row,placeholder);
+      placeholder.remove();
+
+      row=null;
+      touchId=null;
+      placeholder=null;
+      dragging=false;
+
+      commitRoutineOrderFromDom();
+    };
+
+    const end=e=>{
+      if(row) e.preventDefault();
+      finish();
+    };
+
+    const cancel=()=>{
+      finish();
+    };
+
+    handle.addEventListener("touchstart",e=>{
+      if(e.changedTouches.length!==1 || row) return;
+
+      const t=e.changedTouches[0];
+      row=handle.closest(".routine-row");
+      touchId=t.identifier;
+      startX=t.clientX;
+      startY=t.clientY;
+      dragging=false;
+
+      timer=setTimeout(begin,350);
+
+      document.addEventListener("touchmove",move,{passive:false});
+      document.addEventListener("touchend",end,{passive:false});
+      document.addEventListener("touchcancel",cancel,{passive:false});
+
+      // Do not prevent default here so a normal touch can remain normal.
+    },{passive:false});
   });
 }
 
 /* MASTER TEMPLATE EDITOR: Settings only */
 
 function saveMasterPlan(){
-  localStorage.setItem("workoutPlan",JSON.stringify(plan));
-
-  // An unsaved workout should default to the newly updated master template
-  // the next time it is opened.
-  if(!getLogForDate(selectedDate)){
-    resetTemporaryRoutine();
+  if(masterWorkingWorkout && Array.isArray(masterWorkingRoutine)){
+    plan.days[masterWorkingWorkout]=cloneRoutine(masterWorkingRoutine);
   }
+
+  localStorage.setItem("workoutPlan",JSON.stringify(plan));
+  masterHasUnsavedChanges=false;
+  configurationHasUnsavedChanges=false;
 
   const status=document.getElementById("masterRoutineStatus");
   if(status){
     status.textContent="Master template saved.";
-    setTimeout(()=>status.textContent="",1300);
+    setTimeout(()=>status.textContent="",1500);
   }
+
+  refreshConfigurationSaveState();
 }
 
 function renderMasterTabs(){
@@ -2471,13 +3076,36 @@ function renderMasterTabs(){
     btn.textContent=name;
 
     btn.onclick=()=>{
-      masterCurrentWorkout=name;
-      renderMasterTabs();
-      renderMasterRoutineEditor();
+      if(name===masterCurrentWorkout) return;
+
+      const switchTemplate=()=>{
+        masterCurrentWorkout=name;
+        masterWorkingRoutine=null;
+        masterWorkingWorkout=null;
+        masterHasUnsavedChanges=false;
+        configurationHasUnsavedChanges=false;
+        renderMasterTabs();
+        renderMasterRoutineEditor();
+      };
+
+      if(configurationHasUnsavedChanges){
+        pendingConfigurationNavigation=switchTemplate;
+        document.getElementById("configurationUnsavedOverlay").classList.add("open");
+      }else{
+        switchTemplate();
+      }
     };
 
     root.appendChild(btn);
   });
+}
+
+function getMasterWorkingRoutine(){
+  if(masterWorkingWorkout!==masterCurrentWorkout || !Array.isArray(masterWorkingRoutine)){
+    masterWorkingWorkout=masterCurrentWorkout;
+    masterWorkingRoutine=cloneRoutine(plan.days[masterCurrentWorkout] || []);
+  }
+  return masterWorkingRoutine;
 }
 
 function renderMasterRoutineEditor(){
@@ -2493,65 +3121,88 @@ function renderMasterRoutineEditor(){
   title.textContent=masterCurrentWorkout;
   editor.innerHTML="";
 
-  (plan.days[masterCurrentWorkout] || []).forEach((ex,idx)=>{
+  const routine=getMasterWorkingRoutine();
+
+  routine.forEach((ex,idx)=>{
     const row=document.createElement("div");
     row.className="master-routine-row";
     row.dataset.originalIndex=String(idx);
     row.draggable=true;
 
     row.innerHTML=`
-      <button type="button" class="drag-handle master-drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
-      <input value="${escapeAttr(ex.exercise)}" data-master-edit="exercise" data-i="${idx}" aria-label="Exercise name">
-      <input type="number" min="1" value="${ex.sets}" data-master-edit="sets" data-i="${idx}" aria-label="Sets">
-      <input value="${escapeAttr(ex.repRange)}" data-master-edit="repRange" data-i="${idx}" aria-label="Rep range">
-      <input value="${escapeAttr(ex.muscleFocus || inferMuscleFocus(ex.exercise))}" list="muscleFocusOptions" data-master-edit="muscleFocus" data-i="${idx}" aria-label="Muscle focus" placeholder="Muscle">
-      <button type="button" class="danger" data-master-remove="${idx}" title="Remove">×</button>
+      <div class="routine-layer-one">
+        <button type="button" class="drag-handle master-drag-handle" aria-label="Drag to reorder" title="Drag to reorder">☰</button>
+        <input value="${escapeAttr(ex.exercise)}" data-master-edit="exercise" data-i="${idx}" aria-label="Exercise name" placeholder="Exercise">
+        <input type="text" inputmode="numeric" value="${Number(ex.sets)>0 ? escapeAttr(ex.sets) : ""}" data-master-edit="sets" data-i="${idx}" aria-label="Sets" placeholder="Sets">
+        <input value="${escapeAttr(ex.repRange)}" data-master-edit="repRange" data-i="${idx}" aria-label="Reps per set" placeholder="Reps per set">
+        <button type="button" class="danger" data-master-remove="${idx}" title="Remove">×</button>
+      </div>
+      <div class="routine-layer-two">
+        <select data-master-edit="muscleFocus" data-i="${idx}" aria-label="Muscle group">
+          ${muscleGroups.map(name=>`<option value="${escapeAttr(name)}" ${configuredMuscleValue(ex.muscleFocus)===name?"selected":""}>${escapeHtml(name)}</option>`).join("")}
+        </select>
+        <input class="routine-notes" value="${escapeAttr(ex.notes || "")}" data-master-edit="notes" data-i="${idx}" aria-label="Notes" placeholder="Notes">
+      </div>
     `;
 
     editor.appendChild(row);
   });
 
   editor.querySelectorAll("[data-master-edit]").forEach(input=>{
-    input.addEventListener("change",e=>{
+    const update=e=>{
       const i=Number(e.target.dataset.i);
       const field=e.target.dataset.masterEdit;
+      const routine=getMasterWorkingRoutine();
+      if(!routine[i]) return;
 
-      plan.days[masterCurrentWorkout][i][field]=
-        field==="sets"
-          ? Math.max(1,Number(e.target.value)||1)
-          : e.target.value;
+      if(field==="sets"){
+        const raw=String(e.target.value||"").trim();
+        const cleaned=raw.replace(/[^0-9]/g,"");
+        routine[i].sets=cleaned==="" ? 0 : parseInt(cleaned,10);
+      }else{
+        routine[i][field]=e.target.value;
+      }
 
-      saveMasterPlan();
-    });
+      masterHasUnsavedChanges=true;
+      configurationHasUnsavedChanges=true;
+      refreshConfigurationSaveState();
+    };
+
+    input.addEventListener(
+      input.dataset.masterEdit==="sets" ? "input" : "change",
+      update
+    );
   });
 
   editor.querySelectorAll("[data-master-remove]").forEach(btn=>{
     btn.onclick=()=>{
-      plan.days[masterCurrentWorkout].splice(
-        Number(btn.dataset.masterRemove),1
-      );
-
-      saveMasterPlan();
+      const routine=getMasterWorkingRoutine();
+      routine.splice(Number(btn.dataset.masterRemove),1);
+      masterHasUnsavedChanges=true;
+      configurationHasUnsavedChanges=true;
+      refreshConfigurationSaveState();
       renderMasterRoutineEditor();
     };
   });
 
   setupMasterDragAndDrop();
+  editor.scrollLeft=0;
 }
 
 function commitMasterRoutineOrder(){
   const editor=document.getElementById("masterRoutineEditor");
   if(!editor) return;
 
-  const oldRoutine=[...(plan.days[masterCurrentWorkout] || [])];
-
+  const oldRoutine=getMasterWorkingRoutine();
   const order=[...editor.querySelectorAll(".master-routine-row")]
     .map(row=>Number(row.dataset.originalIndex));
 
   if(order.length!==oldRoutine.length) return;
 
-  plan.days[masterCurrentWorkout]=order.map(i=>oldRoutine[i]);
-  saveMasterPlan();
+  masterWorkingRoutine=order.map(i=>oldRoutine[i]);
+  masterHasUnsavedChanges=true;
+  configurationHasUnsavedChanges=true;
+  refreshConfigurationSaveState();
   renderMasterRoutineEditor();
 }
 
@@ -2559,83 +3210,142 @@ function setupMasterDragAndDrop(){
   const editor=document.getElementById("masterRoutineEditor");
   if(!editor) return;
 
-  let nativeDragged=null;
+  const rows=[...editor.querySelectorAll(".master-routine-row")];
+  let draggedRow=null;
 
-  editor.querySelectorAll(".master-routine-row").forEach(row=>{
+  rows.forEach(row=>{
     row.addEventListener("dragstart",e=>{
-      nativeDragged=row;
+      draggedRow=row;
       row.classList.add("dragging");
-      e.dataTransfer?.setData(
-        "text/plain",
-        row.dataset.originalIndex||""
-      );
+      if(e.dataTransfer){
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",row.dataset.originalIndex||"");
+      }
     });
 
     row.addEventListener("dragover",e=>{
       e.preventDefault();
-      if(!nativeDragged || nativeDragged===row) return;
+      if(!draggedRow || draggedRow===row) return;
 
       const rect=row.getBoundingClientRect();
       const after=e.clientY>rect.top+rect.height/2;
-      editor.insertBefore(nativeDragged,after?row.nextSibling:row);
+      editor.insertBefore(draggedRow,after?row.nextSibling:row);
     });
 
     row.addEventListener("dragend",()=>{
-      row.classList.remove("dragging");
-      nativeDragged=null;
+      draggedRow?.classList.remove("dragging");
+      draggedRow=null;
       commitMasterRoutineOrder();
     });
   });
 
-  let pointerRow=null;
-  let activePointerId=null;
-
   editor.querySelectorAll(".master-drag-handle").forEach(handle=>{
-    handle.addEventListener("pointerdown",e=>{
-      if(e.pointerType==="mouse") return;
+    let row=null;
+    let touchId=null;
+    let timer=null;
+    let dragging=false;
+    let placeholder=null;
 
-      pointerRow=handle.closest(".master-routine-row");
-      activePointerId=e.pointerId;
-      pointerRow.classList.add("dragging");
-      handle.setPointerCapture?.(e.pointerId);
+    const getTouch=e=>{
+      return [...e.touches,...e.changedTouches]
+        .find(t=>t.identifier===touchId) || null;
+    };
+
+    const cleanup=()=>{
+      clearTimeout(timer);
+      document.removeEventListener("touchmove",move,{passive:false});
+      document.removeEventListener("touchend",end,{passive:false});
+      document.removeEventListener("touchcancel",cancel,{passive:false});
+      timer=null;
+    };
+
+    const begin=()=>{
+      if(!row || dragging) return;
+
+      dragging=true;
+      row.classList.add("dragging");
+      row.style.pointerEvents="none";
+
+      placeholder=document.createElement("div");
+      placeholder.className="routine-drag-placeholder";
+      placeholder.style.height=`${row.offsetHeight}px`;
+
+      row.parentElement.insertBefore(placeholder,row);
+      row.parentElement.removeChild(row);
+      row.parentElement.appendChild(row);
+    };
+
+    const move=e=>{
+      if(!row) return;
+
+      const touch=getTouch(e);
+      if(!touch || !dragging) return;
+
       e.preventDefault();
-    });
 
-    handle.addEventListener("pointermove",e=>{
-      if(!pointerRow || e.pointerId!==activePointerId) return;
+      const target=document
+        .elementFromPoint(touch.clientX,touch.clientY)
+        ?.closest(".master-routine-row");
 
-      const target=
-        document.elementFromPoint(e.clientX,e.clientY)?.closest(
-          ".master-routine-row"
-        );
+      if(!target || target===row || target.parentElement!==editor) return;
 
-      if(!target || target===pointerRow || target.parentElement!==editor){
+      const rect=target.getBoundingClientRect();
+      const after=touch.clientY>rect.top+rect.height/2;
+
+      editor.insertBefore(
+        placeholder,
+        after?target.nextSibling:target
+      );
+    };
+
+    const finish=()=>{
+      if(!row) return;
+
+      clearTimeout(timer);
+      cleanup();
+
+      if(!dragging){
+        row=null;
+        touchId=null;
         return;
       }
 
-      const rect=target.getBoundingClientRect();
-      const after=e.clientY>rect.top+rect.height/2;
-      editor.insertBefore(pointerRow,after?target.nextSibling:target);
-      e.preventDefault();
-    });
+      row.style.pointerEvents="";
+      row.classList.remove("dragging");
+      editor.insertBefore(row,placeholder);
+      placeholder.remove();
 
-    const finish=e=>{
-      if(!pointerRow || e.pointerId!==activePointerId) return;
+      row=null;
+      touchId=null;
+      placeholder=null;
+      dragging=false;
 
-      pointerRow.classList.remove("dragging");
-
-      try{
-        handle.releasePointerCapture?.(e.pointerId);
-      }catch(_){}
-
-      pointerRow=null;
-      activePointerId=null;
       commitMasterRoutineOrder();
-      e.preventDefault();
     };
 
-    handle.addEventListener("pointerup",finish);
-    handle.addEventListener("pointercancel",finish);
+    const end=e=>{
+      if(row) e.preventDefault();
+      finish();
+    };
+
+    const cancel=()=>{
+      finish();
+    };
+
+    handle.addEventListener("touchstart",e=>{
+      if(e.changedTouches.length!==1 || row) return;
+
+      const t=e.changedTouches[0];
+      row=handle.closest(".master-routine-row");
+      touchId=t.identifier;
+      dragging=false;
+
+      timer=setTimeout(begin,350);
+
+      document.addEventListener("touchmove",move,{passive:false});
+      document.addEventListener("touchend",end,{passive:false});
+      document.addEventListener("touchcancel",cancel,{passive:false});
+    },{passive:false});
   });
 }
 
@@ -2685,9 +3395,13 @@ function renderLog(){
 
     // Recommendation only applies to a NEW workout day.
     // It searches previous workouts with the SAME routine name and the EXACT same exercise name.
-    const previousData=!saved
-      ? getPreviousExerciseData(currentWorkout,ex.exercise,selectedDate)
-      : null;
+    // Always keep the previous matching workout available after saving too.
+    // It is based on the same routine name and exact exercise name.
+    const previousData=getPreviousExerciseData(
+      currentWorkout,
+      ex.exercise,
+      selectedDate
+    );
     const previousEx=previousData?.exercise||null;
 
     for(let s=1;s<=ex.sets;s++){
@@ -2701,30 +3415,34 @@ function renderLog(){
       row.className="set-row";
       row.innerHTML=`
         <div class="set-num">Set ${s}</div>
-        <input
-          inputmode="decimal"
-          placeholder="${escapeAttr(weightHint)}"
-          value="${savedSet.weight??""}"
-          data-field="weight"
-          data-ex="${exIndex}"
-          data-set="${s}"
-        >
-        <input
-          inputmode="numeric"
-          placeholder="${escapeAttr(repsHint)}"
-          value="${savedSet.reps??""}"
-          data-field="reps"
-          data-ex="${exIndex}"
-          data-set="${s}"
-        >
+        <input type="text" inputmode="text" autocomplete="off" placeholder="${escapeAttr(weightHint)}" value="${escapeAttr(savedSet.weight ?? "")}" data-field="weight" data-ex="${exIndex}" data-set="${s}">
+        <input type="text" inputmode="text" autocomplete="off" placeholder="${escapeAttr(repsHint)}" value="${escapeAttr(savedSet.reps ?? "")}" data-field="reps" data-ex="${exIndex}" data-set="${s}">
       `;
       setsDiv.appendChild(row);
     }
 
-    if(previousData && !saved){
+    if(previousData){
       const note=document.createElement("div");
       note.className="previous-note";
-      note.textContent=`Faded values are from ${prettyDate(previousData.log.date)}, the last ${currentWorkout} workout containing exactly “${ex.exercise}”.`;
+
+      const recommendation=(previousEx.sets||[])
+        .filter(s=>s.weight!==null && s.weight!==undefined && s.weight!=="" ||
+                 s.reps!==null && s.reps!==undefined && s.reps!=="")
+        .map(s=>{
+          const weight=(s.weight!==null && s.weight!==undefined && s.weight!=="")
+            ? `${s.weight} lb`
+            : "BW";
+          const reps=(s.reps!==null && s.reps!==undefined && s.reps!=="")
+            ? ` × ${s.reps} reps`
+            : "";
+          return `Set ${s.set}: ${weight}${reps}`;
+        })
+        .join("  •  ");
+
+      note.textContent=saved
+        ? `Previous ${currentWorkout}: ${prettyDate(previousData.log.date)}  •  ${recommendation || "No weight/reps recorded"}`
+        : `Faded previous ${currentWorkout}: ${prettyDate(previousData.log.date)}. ${recommendation || "No weight/reps recorded"}`;
+
       card.appendChild(note);
     }
 
@@ -3073,7 +3791,8 @@ document.getElementById("addMasterExerciseBtn").onclick=()=>{
     exercise:"New Exercise",
     sets:3,
     repRange:"8-12",
-    muscleFocus:"Other"
+    muscleFocus:"Other",
+    notes:""
   });
 
   saveMasterPlan();
@@ -3092,7 +3811,8 @@ document.getElementById("addExerciseBtn").onclick=()=>{
     exercise:"New Exercise",
     sets:3,
     repRange:"8-12",
-    muscleFocus:"Other"
+    muscleFocus:"Other",
+    notes:""
   });
 
   setWorkingRoutine(selectedDate,currentWorkout,routine);
@@ -3101,8 +3821,48 @@ document.getElementById("addExerciseBtn").onclick=()=>{
   renderLog();
 };
 
-document.getElementById("saveWorkoutBtn").onclick=()=>{
+
+function preserveInputValue(value){
+  const text=String(value ?? "").trim();
+  if(text==="") return null;
+
+  const numeric=Number(text);
+  return Number.isFinite(numeric) ? numeric : text;
+}
+
+function getInvalidSetCountExercises(routine){
+  return (routine||[]).filter(ex=>{
+    const count=Number(ex.sets);
+    return !Number.isFinite(count) || count<1;
+  });
+}
+
+function hasInvalidSetCounts(){
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
+  return getInvalidSetCountExercises(routine).length>0;
+}
+
+function validateWorkoutBeforeSave(){
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
+  const invalid=getInvalidSetCountExercises(routine);
+
+  if(invalid.length){
+    const names=invalid.map(ex=>String(ex.exercise||"Unnamed Exercise"));
+    document.getElementById("logStatus").textContent=
+      `Fix the Sets value for: ${names.join(", ")}. Each exercise must have at least 1 set.`;
+    return false;
+  }
+
+  return true;
+}
+
+function saveCurrentWorkout(){
+
   resolveWorkoutForDate(selectedDate);
+
+  if(!validateWorkoutBeforeSave()){
+    return false;
+  }
 
   // Commit the exact routine currently on screen.
   const routineSnapshot=cloneRoutine(
@@ -3126,8 +3886,8 @@ document.getElementById("saveWorkoutBtn").onclick=()=>{
 
       return{
         set:Number(sn),
-        weight:w.value!==""?Number(w.value):null,
-        reps:r.value!==""?Number(r.value):null
+        weight:preserveInputValue(w.value),
+        reps:preserveInputValue(r?.value)
       };
     }).filter(s=>s.weight!==null||s.reps!==null);
 
@@ -3168,6 +3928,14 @@ document.getElementById("saveWorkoutBtn").onclick=()=>{
   renderCalendar();
   renderCalendarSummary();
   renderLog();
+
+  return true;
+}
+
+document.getElementById("saveWorkoutBtn").onclick=()=>{
+  saveCurrentWorkout();
+
+  return true;
 };
 
 
@@ -3230,6 +3998,12 @@ document.getElementById("editWorkoutModal").addEventListener("click",e=>{
   }
 });
 
+document.addEventListener("click",e=>{
+  if(e.target && e.target.id==="invalidSetsOverlay"){
+    cancelInvalidSetsNavigation();
+  }
+});
+
 document.getElementById("deleteModal").addEventListener("click",e=>{
   if(e.target.id==="deleteModal"){
     closeDeleteModal();
@@ -3258,14 +4032,124 @@ document.getElementById("clearLogsBtn").onclick=()=>{
   }
 };
 
-document.getElementById("exportBtn").onclick=()=>{
-  const payload={plan,logs,dayRoutines};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="workout_tracker_export.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
+document.getElementById("exportBtn").onclick=async()=>{
+  const status=document.getElementById("savedStatus");
+
+  try{
+    const payload={
+      exportedAt:new Date().toISOString(),
+      plan,
+      logs,
+      dayRoutines
+    };
+
+    const json=JSON.stringify(payload,null,2);
+
+    const now=new Date();
+    const stamp=[
+      now.getFullYear(),
+      String(now.getMonth()+1).padStart(2,"0"),
+      String(now.getDate()).padStart(2,"0")
+    ].join("-");
+
+    const filename=`workout_tracker_backup_${stamp}.json`;
+    const file=new File(
+      [json],
+      filename,
+      {type:"application/json"}
+    );
+
+    // 1) iPhone/iPad/mobile browsers:
+    // Use the system Share sheet, which lets the user choose "Save to Files".
+    if(
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({files:[file]})
+    ){
+      try{
+        await navigator.share({
+          files:[file],
+          title:"Workout Tracker Backup"
+        });
+
+        status.textContent="Backup opened in the Share menu. Choose Save to Files.";
+        setTimeout(()=>status.textContent="",6000);
+        return;
+      }catch(shareErr){
+        // If the user simply cancels Share, do not create an error.
+        if(shareErr && shareErr.name==="AbortError"){
+          status.textContent="Export cancelled.";
+          setTimeout(()=>status.textContent="",2500);
+          return;
+        }
+        // Otherwise continue to normal download fallback.
+      }
+    }
+
+    // 2) Standard browser download.
+    try{
+      const blob=new Blob(
+        [json],
+        {type:"application/json;charset=utf-8"}
+      );
+
+      const objectUrl=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+
+      a.href=objectUrl;
+      a.download=filename;
+      a.rel="noopener";
+      a.style.display="none";
+
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(()=>{
+        URL.revokeObjectURL(objectUrl);
+        a.remove();
+      },60000);
+
+      status.textContent="JSON backup downloaded.";
+      setTimeout(()=>status.textContent="",5000);
+      return;
+    }catch(downloadErr){
+      console.warn("Direct download failed:",downloadErr);
+    }
+
+    // 3) Last-resort fallback for embedded browsers:
+    // put the complete backup JSON on the clipboard.
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(json);
+
+      status.textContent="Download was blocked, so the full JSON backup was copied to your clipboard.";
+      setTimeout(()=>status.textContent="",8000);
+      return;
+    }
+
+    // 4) Old-browser clipboard fallback.
+    const textarea=document.createElement("textarea");
+    textarea.value=json;
+    textarea.setAttribute("readonly","");
+    textarea.style.position="fixed";
+    textarea.style.opacity="0";
+    textarea.style.pointerEvents="none";
+
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const copied=document.execCommand("copy");
+    textarea.remove();
+
+    if(copied){
+      status.textContent="Download was blocked, so the full JSON backup was copied to your clipboard.";
+      setTimeout(()=>status.textContent="",8000);
+    }else{
+      throw new Error("Export blocked by this browser.");
+    }
+  }catch(err){
+    console.error("JSON export failed:",err);
+    status.textContent="Export failed. Try opening the site in Safari and press Export JSON again.";
+  }
 };
 
 document.getElementById("importFile").addEventListener("change",async e=>{
@@ -3280,9 +4164,8 @@ document.getElementById("importFile").addEventListener("change",async e=>{
     } else if(data.plan && data.plan.days){
       plan=data.plan;
       if(Array.isArray(data.logs)) logs=data.logs;
-      if(data.dayRoutines && typeof data.dayRoutines==="object"){
-        dayRoutines=data.dayRoutines;
-      }
+      if(data.dayRoutines && typeof data.dayRoutines==="object"){dayRoutines=data.dayRoutines;}
+      if(Array.isArray(data.muscleGroups)&&data.muscleGroups.length){muscleGroups=data.muscleGroups.map(x=>String(x).trim()).filter(Boolean);saveMuscleGroups();}
     } else {
       throw new Error("Invalid format");
     }
@@ -3384,6 +4267,52 @@ function migrateOldPlanIfNeeded(){
 
 let currentPage="calendar";
 
+let pendingConfigurationNavigation=null;
+
+function refreshConfigurationSaveState(){
+  const btn=document.getElementById("saveMasterRoutineBtn");
+  if(btn){
+    btn.disabled=!configurationHasUnsavedChanges;
+    btn.style.opacity=configurationHasUnsavedChanges ? "1" : ".55";
+  }
+}
+
+function cancelConfigurationNavigation(){
+  pendingConfigurationNavigation=null;
+  document.getElementById("configurationUnsavedOverlay").classList.remove("open");
+}
+
+function leaveConfigurationWithoutSaving(){
+  const action=pendingConfigurationNavigation;
+
+  pendingConfigurationNavigation=null;
+  masterWorkingRoutine=null;
+  masterWorkingWorkout=null;
+  masterHasUnsavedChanges=false;
+  configurationHasUnsavedChanges=false;
+
+  document.getElementById("configurationUnsavedOverlay").classList.remove("open");
+
+  if(action) action();
+}
+
+function saveAndContinueConfigurationNavigation(){
+  const action=pendingConfigurationNavigation;
+  saveMasterPlan();
+  pendingConfigurationNavigation=null;
+  document.getElementById("configurationUnsavedOverlay").classList.remove("open");
+  if(action) action();
+}
+
+function attemptConfigurationNavigation(action){
+  if(!configurationHasUnsavedChanges){
+    action();
+    return;
+  }
+  pendingConfigurationNavigation=action;
+  document.getElementById("configurationUnsavedOverlay").classList.add("open");
+}
+
 function showPage(pageName,preserveSelectedDate=false){
   if(pageName==="workout" && !preserveSelectedDate){
     // Opening Workout from bottom navigation always means TODAY.
@@ -3439,8 +4368,17 @@ function showPage(pageName,preserveSelectedDate=false){
   }
 
   if(pageName==="settings"){
+    renderMuscleGroups();
+    renderMuscleFocusOptions();
+    if(masterWorkingWorkout===null || masterWorkingWorkout!==masterCurrentWorkout){
+      masterWorkingRoutine=null;
+      masterWorkingWorkout=null;
+      masterHasUnsavedChanges=false;
+      configurationHasUnsavedChanges=false;
+    }
     renderMasterTabs();
     renderMasterRoutineEditor();
+    refreshConfigurationSaveState();
   }
 }
 
@@ -3471,6 +4409,8 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
 
     if(currentPage==="workout"){
       attemptNavigation(()=>showPage(target));
+    }else if(currentPage==="settings"){
+      attemptConfigurationNavigation(()=>showPage(target));
     }else{
       showPage(target);
     }
@@ -3486,6 +4426,12 @@ function renderAll(){
 document.getElementById("unsavedOverlay").addEventListener("click",e=>{
   if(e.target.id==="unsavedOverlay"){
     cancelUnsavedNavigation();
+  }
+});
+
+document.addEventListener("click",e=>{
+  if(e.target && e.target.id==="configurationUnsavedOverlay"){
+    cancelConfigurationNavigation();
   }
 });
 
@@ -3533,6 +4479,17 @@ if(customPrSearch){
   customPrSearch.addEventListener("change",updateCustomPr);
 }
 
+const saveMasterRoutineBtn=document.getElementById("saveMasterRoutineBtn");
+if(saveMasterRoutineBtn){
+  saveMasterRoutineBtn.addEventListener("click",()=>{
+    saveMasterPlan();
+    renderMasterRoutineEditor();
+  });
+}
+
+const addMuscleGroupBtn=document.getElementById("addMuscleGroupBtn");if(addMuscleGroupBtn)addMuscleGroupBtn.addEventListener("click",addMuscleGroup);
+const newMuscleGroupInput=document.getElementById("newMuscleGroupInput");if(newMuscleGroupInput)newMuscleGroupInput.addEventListener("keydown",e=>{if(e.key==="Enter")addMuscleGroup();});
+renderMuscleFocusOptions();
 const routineToggleBtn=document.getElementById("routineToggleBtn");
 const workoutRoutineSection=document.getElementById("workoutRoutineSection");
 
@@ -3546,5 +4503,30 @@ if(routineToggleBtn && workoutRoutineSection){
 migrateOldPlanIfNeeded();
 renderAll();
 </script>
+
+
+<div class="modal-overlay" id="invalidSetsOverlay">
+  <div class="modal-card invalid-sets-card" role="dialog" aria-modal="true" aria-labelledby="invalidSetsTitle">
+    <h3 id="invalidSetsTitle">Fix Sets Before Leaving</h3>
+    <p>
+      One or more exercises has an empty or invalid Sets value.
+      You must enter a value greater than 0 before you can save or leave this workout.
+    </p>
+    <div class="modal-actions">
+      <button type="button" onclick="cancelInvalidSetsNavigation()">Return to Workout</button>
+    </div>
+  </div>
+</div>
+<div class="unsaved-overlay" id="configurationUnsavedOverlay" role="dialog" aria-modal="true" aria-labelledby="configurationUnsavedTitle">
+  <div class="unsaved-card">
+    <h3 id="configurationUnsavedTitle">WARNING</h3>
+    <p>You have unsaved data that may be lost forever.</p>
+    <div class="warning-action-stack">
+      <button type="button" onclick="cancelConfigurationNavigation()">Stay Here</button>
+      <button type="button" class="primary" onclick="saveAndContinueConfigurationNavigation()">Leave With Saving</button>
+      <button type="button" class="danger" onclick="leaveConfigurationWithoutSaving()">Leave Without Saving</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
