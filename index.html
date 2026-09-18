@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V53</title>
+<title>Workout Tracker V54</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2142,6 +2142,164 @@
 
     .routine-sets-reps{
       grid-template-columns:calc((100% - 8px) / 2) calc((100% - 8px) / 2) !important;
+      column-gap:8px !important;
+    }
+  }
+
+
+  /* =========================================================
+     V54 ROUTINE GEOMETRY
+     Exact layout requested:
+       Row 1: Drag | Title | Delete
+       Row 2: Sets (left half) | Reps per Set (right half)
+       Row 3: Muscle Group (full width, same width as row 2)
+     ========================================================= */
+
+  .routine-row,
+  .master-routine-row{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    margin:0 0 10px !important;
+    padding:10px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  .routine-row *,
+  .master-routine-row *{
+    box-sizing:border-box !important;
+  }
+
+  /* ROW 1: drag button | title | red X */
+  .routine-row .routine-title-row,
+  .master-routine-row .routine-title-row{
+    display:grid !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    grid-template-columns:40px minmax(0,1fr) 40px !important;
+    column-gap:8px !important;
+    align-items:center !important;
+    margin:0 0 10px !important;
+    padding:0 !important;
+  }
+
+  .routine-row .routine-title-row .drag-handle,
+  .master-routine-row .routine-title-row .master-drag-handle{
+    grid-column:1 !important;
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  .routine-row .routine-title-row input[data-edit="exercise"],
+  .master-routine-row .routine-title-row input[data-master-edit="exercise"]{
+    grid-column:2 !important;
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding-left:12px !important;
+    padding-right:12px !important;
+  }
+
+  .routine-row .routine-title-row .danger,
+  .master-routine-row .routine-title-row .danger{
+    grid-column:3 !important;
+    justify-self:stretch !important;
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+    margin:0 !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+  }
+
+  /* ROW 2: true 50/50 split from the exact Routine-card content width */
+  .routine-row .routine-sets-reps,
+  .master-routine-row .routine-sets-reps{
+    display:grid !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    column-gap:8px !important;
+    align-items:start !important;
+    margin:0 0 10px !important;
+    padding:0 !important;
+  }
+
+  .routine-row .routine-sets-reps > div,
+  .master-routine-row .routine-sets-reps > div{
+    display:block !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  .routine-row .routine-sets-reps input[data-edit="sets"],
+  .master-routine-row .routine-sets-reps input[data-master-edit="sets"],
+  .routine-row .routine-sets-reps input[data-edit="repRange"],
+  .master-routine-row .routine-sets-reps input[data-master-edit="repRange"]{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+  }
+
+  /* ROW 3: Muscle Group is the reference width */
+  .routine-row .routine-muscle,
+  .master-routine-row .routine-muscle{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  .routine-row .routine-muscle select,
+  .master-routine-row .routine-muscle select{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+  }
+
+  /* Remove any stale mobile grid that can override the exact geometry. */
+  @media(max-width:680px){
+    .routine-row .routine-title-row,
+    .master-routine-row .routine-title-row{
+      grid-template-columns:38px minmax(0,1fr) 36px !important;
+      column-gap:6px !important;
+    }
+
+    .routine-row .routine-title-row .drag-handle,
+    .master-routine-row .routine-title-row .master-drag-handle{
+      width:38px !important;
+      min-width:38px !important;
+      max-width:38px !important;
+    }
+
+    .routine-row .routine-title-row .danger,
+    .master-routine-row .routine-title-row .danger{
+      width:36px !important;
+      min-width:36px !important;
+      max-width:36px !important;
+    }
+
+    .routine-row .routine-sets-reps,
+    .master-routine-row .routine-sets-reps{
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
       column-gap:8px !important;
     }
   }
