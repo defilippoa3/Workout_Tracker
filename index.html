@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V52</title>
+<title>Workout Tracker V53</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2042,6 +2042,110 @@
     }
   }
 
+
+  /* V53: explicit phone-safe geometry for routine cards */
+  .routine-row,
+  .master-routine-row{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    padding:10px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  .routine-title-row{
+    display:grid !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    grid-template-columns:40px calc(100% - 96px) 40px !important;
+    column-gap:8px !important;
+    align-items:center !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-title-row input{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-title-row .drag-handle,
+  .routine-title-row .danger{
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps{
+    display:grid !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    grid-template-columns:calc((100% - 8px) / 2) calc((100% - 8px) / 2) !important;
+    column-gap:8px !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps > div{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps input{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-muscle,
+  .routine-muscle select{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  @media(max-width:680px){
+    .routine-row,
+    .master-routine-row{
+      padding:9px !important;
+    }
+
+    .routine-title-row{
+      grid-template-columns:38px calc(100% - 80px) 36px !important;
+      column-gap:6px !important;
+    }
+
+    .routine-title-row .drag-handle{
+      width:38px !important;
+      min-width:38px !important;
+      max-width:38px !important;
+    }
+
+    .routine-title-row .danger{
+      width:36px !important;
+      min-width:36px !important;
+      max-width:36px !important;
+    }
+
+    .routine-sets-reps{
+      grid-template-columns:calc((100% - 8px) / 2) calc((100% - 8px) / 2) !important;
+      column-gap:8px !important;
+    }
+  }
+
 </style>
 
 <style>
@@ -2120,7 +2224,7 @@
               </div>
               <button id="addExerciseBtn" type="button">+ Add Exercise</button>
             </div>
-            <div class="routine-scroll-hint"></div><div class="routine-editor" id="routineEditor"></div>
+            <div class="routine-scroll-hint"></div><div class="routine-editor" id="routineEditor" style="width:100%;max-width:100%;min-width:0;box-sizing:border-box;"></div>
             <div class="status" id="routineStatus"></div>
           </div>
         </div>
@@ -2235,7 +2339,7 @@
             </div>
           </div>
 
-          <div class="routine-scroll-hint"></div><div class="routine-editor" id="masterRoutineEditor"></div>
+          <div class="routine-scroll-hint"></div><div class="routine-editor" id="masterRoutineEditor" style="width:100%;max-width:100%;min-width:0;box-sizing:border-box;"></div>
           <div class="status" id="masterRoutineStatus"></div>
         </div>
 
@@ -3326,11 +3430,11 @@ function renderRoutineEditor(){
       </div>
 
       <div class="routine-sets-reps">
-        <div>
+        <div style="width:100%;min-width:0;">
           <div class="routine-field-label">Sets</div>
           <input type="text" inputmode="numeric" value="${Number(ex.sets)>0 ? escapeAttr(ex.sets) : ""}" data-edit="sets" data-i="${idx}" aria-label="Sets" placeholder="Sets" class="${Number(ex.sets)<1 ? "invalid-set" : ""}">
         </div>
-        <div>
+        <div style="width:100%;min-width:0;">
           <div class="routine-field-label">Reps per Set</div>
           <input value="${escapeAttr(ex.repRange)}" data-edit="repRange" data-i="${idx}" aria-label="Reps per set" placeholder="Reps per set">
         </div>
@@ -3530,11 +3634,11 @@ function renderMasterRoutineEditor(){
       </div>
 
       <div class="routine-sets-reps">
-        <div>
+        <div style="width:100%;min-width:0;">
           <div class="routine-field-label">Sets</div>
           <input type="text" inputmode="numeric" value="${Number(ex.sets)>0 ? escapeAttr(ex.sets) : ""}" data-master-edit="sets" data-i="${idx}" aria-label="Sets" placeholder="Sets" class="${Number(ex.sets)<1 ? "invalid-set" : ""}">
         </div>
-        <div>
+        <div style="width:100%;min-width:0;">
           <div class="routine-field-label">Reps per Set</div>
           <input value="${escapeAttr(ex.repRange)}" data-master-edit="repRange" data-i="${idx}" aria-label="Reps per set" placeholder="Reps per set">
         </div>
