@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V47</title>
+<title>Workout Tracker V50</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -1733,6 +1733,121 @@
     }
   }
 
+
+  .workout-tab[data-workout="Omega"]{
+    color:#ffffff;
+    border-color:#ffffff;
+  }
+
+  .workout-tab[data-workout="Omega"].active{
+    background:#ffffff;
+    color:#111111;
+  }
+
+  /* V50 mobile width cleanup */
+  .routine-row,
+  .master-routine-row{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden;
+  }
+
+  .routine-title-row{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    grid-template-columns:40px minmax(0,1fr) 40px !important;
+    box-sizing:border-box;
+  }
+
+  .routine-title-row > *{
+    min-width:0 !important;
+    box-sizing:border-box;
+  }
+
+  .routine-title-row input{
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  .routine-title-row .danger{
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+  }
+
+  .routine-sets-reps{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    box-sizing:border-box;
+  }
+
+  .routine-sets-reps > div{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  .routine-sets-reps input{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box;
+  }
+
+  .routine-muscle,
+  .routine-muscle select{
+    width:100% !important;
+    max-width:100%;
+    min-width:0 !important;
+    box-sizing:border-box;
+  }
+
+  @media(max-width:680px){
+    .routine-row,
+    .master-routine-row{
+      padding:9px !important;
+    }
+
+    .routine-title-row{
+      grid-template-columns:38px minmax(0,1fr) 36px !important;
+      gap:6px !important;
+    }
+
+    .routine-title-row .danger{
+      width:36px !important;
+      min-width:36px !important;
+      max-width:36px !important;
+    }
+
+    .routine-sets-reps{
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+      gap:7px !important;
+    }
+  }
+
+</style>
+
+<style>
+/* V49: six daily workout buttons in two equal rows of three */
+#workoutTabs.workout-tabs{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+#workoutTabs .workout-tab{
+  grid-column:auto !important;
+  width:100% !important;
+}
+@media(max-width:680px){
+  #workoutTabs.workout-tabs{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1788,7 +1903,7 @@
             <div class="routine-top">
               <div>
                 <div class="routine-title" id="routineTitle"></div>
-                <div class="muted">If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.</div>
+                <div class="muted" id="routineHelpText">If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.</div>
               </div>
               <button id="addExerciseBtn" type="button">+ Add Exercise</button>
             </div>
@@ -2043,7 +2158,8 @@ let hasUnsavedChanges=false;
 let loadedFormSignature="";
 let pendingNavigation=null;
 
-const workoutColors={Alpha:"#ff5b66",Beta:"#4f8cff",Gamma:"#32c982",Delta:"#ff9f43",Epsilon:"#ffd84d"};
+const workoutColors={Alpha:"#ff5b66",Beta:"#4f8cff",Gamma:"#32c982",Delta:"#ff9f43",Epsilon:"#ffd84d",Omega:"#ffffff"};
+const dailyOnlyWorkouts=["Omega"];
 
 function routineSignature(r){
   return JSON.stringify((r||[]).map(ex=>({
@@ -2259,12 +2375,12 @@ function resolveWorkoutForDate(date){
 
   if(saved){
     const savedName=saved.workoutName || saved.day;
-    if(savedName && plan.days[savedName]){
+    if(savedName && (plan.days[savedName] || dailyOnlyWorkouts.includes(savedName))){
       currentWorkout=savedName;
     }
   }
 
-  if(!plan.days[currentWorkout]){
+  if(!plan.days[currentWorkout] && !dailyOnlyWorkouts.includes(currentWorkout)){
     currentWorkout=Object.keys(plan.days)[0] || "Alpha";
   }
 
@@ -2307,6 +2423,20 @@ function initializeWorkingRoutine(date,workoutName){
 }
 
 function getWorkingRoutine(date,workoutName){
+  if(dailyOnlyWorkouts.includes(workoutName)){
+    const key=dayRoutineKey(date,workoutName);
+
+    if(temporaryRoutineKey===key && Array.isArray(temporaryRoutine)){
+      return temporaryRoutine;
+    }
+
+    // Omega starts as a blank, fully free-form daily routine.
+    temporaryRoutineKey=key;
+    temporaryRoutine=[];
+    routineHasUnsavedChanges=false;
+    return temporaryRoutine;
+  }
+
   return initializeWorkingRoutine(date,workoutName);
 }
 
@@ -2920,7 +3050,9 @@ function renderProgressPage(){
 
 function renderTabs(){
   workoutTabs.innerHTML="";
-  Object.keys(plan.days).forEach(name=>{
+  const dailyWorkoutNames=[...Object.keys(plan.days),...dailyOnlyWorkouts];
+
+  dailyWorkoutNames.forEach(name=>{
     const btn=document.createElement("button");
     btn.type="button";
     btn.className="workout-tab"+(name===currentWorkout?" active":"");
@@ -2957,6 +3089,12 @@ function renderRoutineEditor(){
   resolveWorkoutForDate(selectedDate);
 
   routineTitle.textContent=currentWorkout;
+  const routineHelpText=document.getElementById("routineHelpText");
+  if(routineHelpText){
+    routineHelpText.textContent=dailyOnlyWorkouts.includes(currentWorkout)
+      ? "Omega starts completely blank. Add whatever exercises you want for this day."
+      : "If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.";
+  }
   routineEditor.innerHTML="";
 
   const routine=getWorkingRoutine(selectedDate,currentWorkout);
@@ -4405,7 +4543,7 @@ function showPage(pageName,preserveSelectedDate=false){
       if(savedName && plan.days[savedName]){
         currentWorkout=savedName;
       }
-    }else if(!plan.days[currentWorkout]){
+    }else if(!plan.days[currentWorkout] && !dailyOnlyWorkouts.includes(currentWorkout)){
       currentWorkout=Object.keys(plan.days)[0] || "Alpha";
     }
   }
