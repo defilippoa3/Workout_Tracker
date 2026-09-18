@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V51</title>
+<title>Workout Tracker V52</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -1902,6 +1902,120 @@
     .master-routine-row{
       width:100% !important;
       max-width:100vw !important;
+      padding:9px !important;
+    }
+
+    .routine-title-row{
+      grid-template-columns:38px minmax(0,1fr) 36px !important;
+      gap:6px !important;
+    }
+
+    .routine-title-row .drag-handle{
+      width:38px !important;
+      min-width:38px !important;
+      max-width:38px !important;
+    }
+
+    .routine-title-row .danger{
+      width:36px !important;
+      min-width:36px !important;
+      max-width:36px !important;
+    }
+
+    .routine-sets-reps{
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+      gap:8px !important;
+    }
+  }
+
+
+  /* V52: hard phone containment and true 50/50 Sets / Reps layout */
+  .page-card,
+  .section-static,
+  .routine-editor{
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:hidden !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-row,
+  .master-routine-row{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+  }
+
+  .routine-title-row{
+    display:grid !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    grid-template-columns:40px minmax(0,1fr) 40px !important;
+    gap:8px !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-title-row > *{
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-title-row input{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+
+  .routine-title-row .drag-handle,
+  .routine-title-row .danger{
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps{
+    display:grid !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:10px !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps > div{
+    width:auto !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-sets-reps input{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  .routine-muscle,
+  .routine-muscle select{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  @media(max-width:680px){
+    .routine-row,
+    .master-routine-row{
+      width:100% !important;
+      max-width:100% !important;
       padding:9px !important;
     }
 
