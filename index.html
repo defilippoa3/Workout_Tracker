@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V61</title>
+<title>Workout Tracker V62</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2753,26 +2753,56 @@ function getLastSavedDailyStateSignature(){
   });
 }
 
-function refreshDirtyState(){
-  const current=getCurrentDailyStateSignature();
-  const saved=getLastSavedDailyStateSignature();
+function buildCurrentDailyState(){
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
 
-  hasUnsavedChanges=current!==saved;
+  const form=[...workoutArea.querySelectorAll(
+    'input[data-field="weight"], input[data-field="reps"], textarea[data-field="liftNote"]'
+  )].map(input=>({
+    ex:Number(input.dataset.ex||0),
+    set:Number(input.dataset.set||0),
+    field:String(input.dataset.field||""),
+    value:String(input.value||"").trim()
+  }));
+
+  const workoutNote=String(
+    document.getElementById("workoutNote")?.value||""
+  ).trim();
+
+  return {
+    routine:routineSignature(routine),
+    form,
+    workoutNote
+  };
+}
+
+let dailyBaselineKey=null;
+let dailyBaselineState=null;
+
+function captureDailyBaseline(){
+  dailyBaselineKey=dayRoutineKey(selectedDate,currentWorkout);
+  dailyBaselineState=buildCurrentDailyState();
+  hasUnsavedChanges=false;
+  routineHasUnsavedChanges=false;
+}
+
+function refreshDirtyState(){
+  const key=dayRoutineKey(selectedDate,currentWorkout);
+
+  // A missing/mismatched baseline means the workout has not been loaded
+  // into a clean editing state yet. Establish it from the current screen.
+  if(!dailyBaselineState || dailyBaselineKey!==key){
+    captureDailyBaseline();
+    return false;
+  }
+
+  const current=buildCurrentDailyState();
+
+  hasUnsavedChanges=
+    JSON.stringify(current)!==JSON.stringify(dailyBaselineState);
+
   routineHasUnsavedChanges=
-    routineSignature(getWorkingRoutine(selectedDate,currentWorkout)) !==
-    routineSignature(
-      (() => {
-        const savedLog=getLogForDate(selectedDate);
-        if(savedLog &&
-           (savedLog.workoutName||savedLog.day)===currentWorkout &&
-           Array.isArray(savedLog.routineSnapshot)){
-          return savedLog.routineSnapshot;
-        }
-        return dailyOnlyWorkouts.includes(currentWorkout)
-          ? []
-          : cloneRoutine(plan.days[currentWorkout]||[]);
-      })()
-    );
+    current.routine!==dailyBaselineState.routine;
 
   return hasUnsavedChanges;
 }
@@ -2817,6 +2847,8 @@ function confirmUnsavedNavigation(){
   routineHasUnsavedChanges=false;
   temporaryRoutine=null;
   temporaryRoutineKey=null;
+  dailyBaselineKey=null;
+  dailyBaselineState=null;
   document.getElementById("unsavedOverlay").classList.remove("open");
 
   if(typeof action==="function"){
@@ -2990,6 +3022,8 @@ function resetTemporaryRoutine(){
   temporaryRoutine=null;
   temporaryRoutineKey=null;
   routineHasUnsavedChanges=false;
+  dailyBaselineKey=null;
+  dailyBaselineState=null;
 }
 
 function initializeWorkingRoutine(date,workoutName){
@@ -3010,16 +3044,12 @@ function initializeWorkingRoutine(date,workoutName){
   ){
     temporaryRoutineKey=key;
     temporaryRoutine=cloneRoutine(saved.routineSnapshot);
-    loadedRoutineSignature=routineSignature(temporaryRoutine);
-    routineHasUnsavedChanges=false;
     return temporaryRoutine;
   }
 
   // Unsaved workout: load a one-time copy of the CURRENT master template.
   temporaryRoutineKey=key;
   temporaryRoutine=cloneRoutine(plan.days[workoutName] || []);
-  loadedRoutineSignature=routineSignature(temporaryRoutine);
-  routineHasUnsavedChanges=false;
   return temporaryRoutine;
 }
 
@@ -3042,8 +3072,6 @@ function getWorkingRoutine(date,workoutName){
     }
 
     temporaryRoutineKey=key;
-    loadedRoutineSignature=routineSignature(temporaryRoutine);
-    routineHasUnsavedChanges=false;
     return temporaryRoutine;
   }
 
@@ -3053,7 +3081,7 @@ function getWorkingRoutine(date,workoutName){
 function setWorkingRoutine(date,workoutName,routine){
   temporaryRoutineKey=dayRoutineKey(date,workoutName);
   temporaryRoutine=cloneRoutine(routine);
-  routineHasUnsavedChanges=true;
+  refreshDirtyState();
 }
 
 function removeSavedDayRoutine(date,workoutName){
@@ -3675,10 +3703,10 @@ function renderTabs(){
       attemptNavigation(()=>{
         currentWorkout=name;
         resetTemporaryRoutine();
-        hasUnsavedChanges=false;
         renderTabs();
         renderRoutineEditor();
         renderLog();
+        captureDailyBaseline();
         loadedFormSignature=getCurrentFormSignature();
         refreshDirtyState();
       });
@@ -4251,9 +4279,6 @@ function renderLog(){
       i.addEventListener("change",markDirty);
     });
 
-  loadedFormSignature=getCurrentFormSignature();
-  refreshDirtyState();
-
   if(saved){
     const savedColor=workoutColors[savedWorkoutName]||"#4f8cff";
     selectedDateBanner.innerHTML=
@@ -4745,9 +4770,7 @@ function saveCurrentWorkout(){
   renderCalendarSummary();
   renderLog();
 
-  loadedFormSignature=getCurrentFormSignature();
-  hasUnsavedChanges=false;
-  routineHasUnsavedChanges=false;
+  captureDailyBaseline();
 
   return true;
 }
@@ -5225,8 +5248,7 @@ function showPage(pageName,preserveSelectedDate=false){
     renderTabs();
     renderRoutineEditor();
     renderLog();
-    loadedFormSignature=getCurrentFormSignature();
-    refreshDirtyState();
+    captureDailyBaseline();
     return;
   }
 
@@ -5261,7 +5283,7 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
       if(currentPage==="workout"){
         refreshDirtyState();
 
-        if(hasUnsavedChanges){
+        if(refreshDirtyState()){
           attemptNavigation(goToday);
         }else{
           goToday();
