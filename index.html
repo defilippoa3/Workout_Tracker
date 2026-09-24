@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V55</title>
+<title>Workout Tracker V60</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2304,6 +2304,8 @@
     }
   }
 
+
+  .previous-note{display:none !important;}
 </style>
 
 <style>
@@ -2607,7 +2609,7 @@
   </div>
 </div>
 <script>
-const defaultPlan = {"programName":"5-Day Push Pull Arms+Abs Upper Legs","days":{"Alpha":[{"exercise":"Bench Press","sets":3,"repRange":"6-8","muscleFocus":"Chest","notes":""},{"exercise":"Incline Dumbbell Press","sets":3,"repRange":"8-10","muscleFocus":"Chest","notes":""},{"exercise":"Pec Deck or Cable Fly","sets":2,"repRange":"10-15","muscleFocus":"Chest","notes":""},{"exercise":"Cable Lateral Raise","sets":3,"repRange":"12-15","muscleFocus":"Shoulders","notes":""},{"exercise":"Triceps Pushdown","sets":3,"repRange":"10-15","muscleFocus":"Triceps","notes":""}],"Beta":[{"exercise":"Barbell Row","sets":3,"repRange":"6-8","muscleFocus":"Back","notes":""},{"exercise":"Wide-Grip Lat Pulldown","sets":3,"repRange":"8-10","muscleFocus":"Back","notes":""},{"exercise":"Seated Cable Row","sets":3,"repRange":"8-12","muscleFocus":"Back","notes":""},{"exercise":"Reverse Pec Deck","sets":2,"repRange":"12-15","muscleFocus":"Shoulders","notes":""},{"exercise":"Dumbbell or Cable Curl","sets":3,"repRange":"8-12","muscleFocus":"Biceps","notes":""}],"Gamma":[{"exercise":"EZ-Bar Curl","sets":3,"repRange":"8-10","muscleFocus":"Biceps","notes":""},{"exercise":"Skull Crushers","sets":3,"repRange":"8-10","muscleFocus":"Triceps","notes":""},{"exercise":"Incline Dumbbell Curl","sets":3,"repRange":"10-12","muscleFocus":"Biceps","notes":""},{"exercise":"Rope Triceps Pushdown","sets":3,"repRange":"10-15","muscleFocus":"Triceps","notes":""},{"exercise":"Hanging Leg Raise","sets":3,"repRange":"10-15","muscleFocus":"Abs","notes":""},{"exercise":"Cable Crunch","sets":3,"repRange":"10-15","muscleFocus":"Abs","notes":""}],"Delta":[{"exercise":"OH Press","sets":3,"repRange":"6-8","muscleFocus":"Shoulders","notes":""},{"exercise":"Shoulder Dumbbell Press","sets":3,"repRange":"8-10","muscleFocus":"Shoulders","notes":""},{"exercise":"Lateral Cable Raise","sets":3,"repRange":"8-12","muscleFocus":"Shoulders","notes":""},{"exercise":"Vert Chest Press","sets":3,"repRange":"8-12","muscleFocus":"Chest","notes":""},{"exercise":"Close Grip Pull Down","sets":3,"repRange":"8-12","muscleFocus":"Back","notes":""},{"exercise":"Shrug","sets":2,"repRange":"12-20","muscleFocus":"Shoulders","notes":""}],"Epsilon":[{"exercise":"Back Squat","sets":3,"repRange":"5-8","muscleFocus":"Quads","notes":""},{"exercise":"Romanian Deadlift","sets":3,"repRange":"6-10","muscleFocus":"Hamstrings","notes":""},{"exercise":"Leg Press","sets":3,"repRange":"8-12","muscleFocus":"Quads","notes":""},{"exercise":"Leg Curl","sets":3,"repRange":"10-15","muscleFocus":"Hamstrings","notes":""},{"exercise":"Leg Extension","sets":2,"repRange":"10-15","muscleFocus":"Quads","notes":""},{"exercise":"Standing Calf Raise","sets":3,"repRange":"10-15","muscleFocus":"Calves","notes":""}]}};
+const defaultPlan = {"programName":"5-Day Push Pull Arms+Abs Upper Legs","days":{"Alpha":[{"exercise":"Bench Press","sets":3,"repRange":"6-8","muscleFocus":"Chest","notes":""},{"exercise":"Incline Dumbbell Press","sets":3,"repRange":"8-10","muscleFocus":"Chest","notes":""},{"exercise":"Pec Deck or Cable Fly","sets":2,"repRange":"10-15","muscleFocus":"Chest","notes":""},{"exercise":"Cable Lateral Raise","sets":3,"repRange":"12-15","muscleFocus":"Shoulder","notes":""},{"exercise":"Triceps Pushdown","sets":3,"repRange":"10-15","muscleFocus":"Triceps","notes":""}],"Beta":[{"exercise":"Barbell Row","sets":3,"repRange":"6-8","muscleFocus":"Back","notes":""},{"exercise":"Wide-Grip Lat Pulldown","sets":3,"repRange":"8-10","muscleFocus":"Back","notes":""},{"exercise":"Seated Cable Row","sets":3,"repRange":"8-12","muscleFocus":"Back","notes":""},{"exercise":"Reverse Pec Deck","sets":2,"repRange":"12-15","muscleFocus":"Shoulder","notes":""},{"exercise":"Dumbbell or Cable Curl","sets":3,"repRange":"8-12","muscleFocus":"Biceps","notes":""}],"Gamma":[{"exercise":"EZ-Bar Curl","sets":3,"repRange":"8-10","muscleFocus":"Biceps","notes":""},{"exercise":"Skull Crushers","sets":3,"repRange":"8-10","muscleFocus":"Triceps","notes":""},{"exercise":"Incline Dumbbell Curl","sets":3,"repRange":"10-12","muscleFocus":"Biceps","notes":""},{"exercise":"Rope Triceps Pushdown","sets":3,"repRange":"10-15","muscleFocus":"Triceps","notes":""},{"exercise":"Hanging Leg Raise","sets":3,"repRange":"10-15","muscleFocus":"Abs","notes":""},{"exercise":"Cable Crunch","sets":3,"repRange":"10-15","muscleFocus":"Abs","notes":""}],"Delta":[{"exercise":"OH Press","sets":3,"repRange":"6-8","muscleFocus":"Shoulder","notes":""},{"exercise":"Shoulder Dumbbell Press","sets":3,"repRange":"8-10","muscleFocus":"Shoulder","notes":""},{"exercise":"Lateral Cable Raise","sets":3,"repRange":"8-12","muscleFocus":"Shoulder","notes":""},{"exercise":"Vert Chest Press","sets":3,"repRange":"8-12","muscleFocus":"Chest","notes":""},{"exercise":"Close Grip Pull Down","sets":3,"repRange":"8-12","muscleFocus":"Back","notes":""},{"exercise":"Shrug","sets":2,"repRange":"12-20","muscleFocus":"Shoulder","notes":""}],"Epsilon":[{"exercise":"Back Squat","sets":3,"repRange":"5-8","muscleFocus":"Quads","notes":""},{"exercise":"Romanian Deadlift","sets":3,"repRange":"6-10","muscleFocus":"Hamstrings","notes":""},{"exercise":"Leg Press","sets":3,"repRange":"8-12","muscleFocus":"Quads","notes":""},{"exercise":"Leg Curl","sets":3,"repRange":"10-15","muscleFocus":"Hamstrings","notes":""},{"exercise":"Leg Extension","sets":2,"repRange":"10-15","muscleFocus":"Quads","notes":""},{"exercise":"Standing Calf Raise","sets":3,"repRange":"10-15","muscleFocus":"Calves","notes":""}]}};
 
 let plan = JSON.parse(localStorage.getItem("workoutPlan")) || defaultPlan;
 let logs = JSON.parse(localStorage.getItem("workoutLogs")) || [];
@@ -2631,6 +2633,7 @@ calendarCursor.setDate(1);
 
 let hasUnsavedChanges=false;
 let loadedFormSignature="";
+let loadedRoutineSignature="";
 let pendingNavigation=null;
 
 const workoutColors={Alpha:"#ff5b66",Beta:"#4f8cff",Gamma:"#32c982",Delta:"#ff9f43",Epsilon:"#ffd84d",Omega:"#ffffff"};
@@ -2660,7 +2663,13 @@ function getCurrentFormSignature(){
 
 function refreshDirtyState(){
   const logChanged=getCurrentFormSignature() !== loadedFormSignature;
-  hasUnsavedChanges = logChanged || routineHasUnsavedChanges;
+  const routineChanged=(
+    getWorkingRoutine(selectedDate,currentWorkout),
+    routineSignature(getWorkingRoutine(selectedDate,currentWorkout)) !== loadedRoutineSignature
+  );
+
+  hasUnsavedChanges=Boolean(logChanged || routineChanged);
+  routineHasUnsavedChanges=routineChanged;
   return hasUnsavedChanges;
 }
 
@@ -2687,6 +2696,12 @@ function attemptNavigation(action){
   }
 }
 
+function cancelUnsavedNavigation(){
+  document.getElementById("unsavedOverlay").classList.remove("open");
+  pendingNavigation=null;
+  refreshDirtyState();
+}
+
 function confirmUnsavedNavigation(){
   const action=pendingNavigation;
   pendingNavigation=null;
@@ -2695,7 +2710,10 @@ function confirmUnsavedNavigation(){
   temporaryRoutine=null;
   temporaryRoutineKey=null;
   document.getElementById("unsavedOverlay").classList.remove("open");
-  if(action) action();
+
+  if(typeof action==="function"){
+    action();
+  }
 }
 
 function cancelInvalidSetsNavigation(){
@@ -2734,7 +2752,9 @@ function saveAndConfirmUnsavedNavigation(){
   routineHasUnsavedChanges=false;
   document.getElementById("unsavedOverlay").classList.remove("open");
 
-  if(action) action();
+  if(typeof action==="function"){
+    action();
+  }
 }
 
 function normalizeExerciseName(name){
@@ -2886,6 +2906,7 @@ function initializeWorkingRoutine(date,workoutName){
   ){
     temporaryRoutineKey=key;
     temporaryRoutine=cloneRoutine(saved.routineSnapshot);
+    loadedRoutineSignature=routineSignature(temporaryRoutine);
     routineHasUnsavedChanges=false;
     return temporaryRoutine;
   }
@@ -2893,21 +2914,31 @@ function initializeWorkingRoutine(date,workoutName){
   // Unsaved workout: load a one-time copy of the CURRENT master template.
   temporaryRoutineKey=key;
   temporaryRoutine=cloneRoutine(plan.days[workoutName] || []);
+  loadedRoutineSignature=routineSignature(temporaryRoutine);
   routineHasUnsavedChanges=false;
   return temporaryRoutine;
 }
 
 function getWorkingRoutine(date,workoutName){
-  if(dailyOnlyWorkouts.includes(workoutName)){
-    const key=dayRoutineKey(date,workoutName);
+  const key=dayRoutineKey(date,workoutName);
 
-    if(temporaryRoutineKey===key && Array.isArray(temporaryRoutine)){
-      return temporaryRoutine;
+  if(temporaryRoutineKey===key && Array.isArray(temporaryRoutine)){
+    return temporaryRoutine;
+  }
+
+  if(dailyOnlyWorkouts.includes(workoutName)){
+    const saved=getLogForDate(date);
+
+    // Re-open the exact saved Omega routine if one exists.
+    if(saved && (saved.workoutName||saved.day)===workoutName && Array.isArray(saved.routineSnapshot)){
+      temporaryRoutine=cloneRoutine(saved.routineSnapshot);
+    }else{
+      // Omega starts with no exercises.
+      temporaryRoutine=[];
     }
 
-    // Omega starts as a blank, fully free-form daily routine.
     temporaryRoutineKey=key;
-    temporaryRoutine=[];
+    loadedRoutineSignature=routineSignature(temporaryRoutine);
     routineHasUnsavedChanges=false;
     return temporaryRoutine;
   }
@@ -3544,6 +3575,8 @@ function renderTabs(){
         renderTabs();
         renderRoutineEditor();
         renderLog();
+        loadedFormSignature=getCurrentFormSignature();
+        refreshDirtyState();
       });
     };
 
@@ -4086,28 +4119,6 @@ function renderLog(){
     card.appendChild(liftNote);
 
     if(previousData){
-      const note=document.createElement("div");
-      note.className="previous-note";
-
-      const recommendation=(previousEx.sets||[])
-        .filter(s=>s.weight!==null && s.weight!==undefined && s.weight!=="" ||
-                 s.reps!==null && s.reps!==undefined && s.reps!=="")
-        .map(s=>{
-          const weight=(s.weight!==null && s.weight!==undefined && s.weight!=="")
-            ? `${s.weight} lb`
-            : "BW";
-          const reps=(s.reps!==null && s.reps!==undefined && s.reps!=="")
-            ? ` × ${s.reps} reps`
-            : "";
-          return `Set ${s.set}: ${weight}${reps}`;
-        })
-        .join("  •  ");
-
-      note.textContent=saved
-        ? `Previous ${currentWorkout}: ${prettyDate(previousData.log.date)}  •  ${recommendation || "No weight/reps recorded"}`
-        : `Faded previous ${currentWorkout}: ${prettyDate(previousData.log.date)}. ${recommendation || "No weight/reps recorded"}`;
-
-      card.appendChild(note);
     }
 
     workoutArea.appendChild(card);
@@ -4128,7 +4139,7 @@ function renderLog(){
     });
 
   loadedFormSignature=getCurrentFormSignature();
-  hasUnsavedChanges=routineHasUnsavedChanges;
+  refreshDirtyState();
 
   if(saved){
     const savedColor=workoutColors[savedWorkoutName]||"#4f8cff";
@@ -4608,6 +4619,7 @@ function saveCurrentWorkout(){
   saveDayRoutines();
 
   resetTemporaryRoutine();
+  loadedRoutineSignature=routineSignature(routineSnapshot);
   hasUnsavedChanges=false;
 
   document.getElementById("logStatus").textContent="Workout saved.";
@@ -4620,13 +4632,16 @@ function saveCurrentWorkout(){
   renderCalendarSummary();
   renderLog();
 
+  loadedFormSignature=getCurrentFormSignature();
+  hasUnsavedChanges=false;
+  routineHasUnsavedChanges=false;
+
   return true;
 }
 
 document.getElementById("saveWorkoutBtn").onclick=()=>{
-  saveCurrentWorkout();
-
-  return true;
+  const saved=saveCurrentWorkout();
+  return saved;
 };
 
 
@@ -4875,6 +4890,53 @@ document.getElementById("importFile").addEventListener("change",async e=>{
 });
 
 
+
+function applyDeltaDefaultTemplate(){
+  const versionKey="deltaDefaultAppliedV2";
+  if(localStorage.getItem(versionKey)==="yes") return;
+
+  plan.days["Delta"] = [
+    {"exercise":"OH Press","sets":3,"repRange":"6-8","muscleFocus":"Shoulders","notes":""},
+    {"exercise":"Shoulder Dumbbell Press","sets":3,"repRange":"8-10","muscleFocus":"Shoulders","notes":""},
+    {"exercise":"Lateral Cable Raise","sets":3,"repRange":"8-12","muscleFocus":"Shoulders","notes":""},
+    {"exercise":"Vert Chest Press","sets":3,"repRange":"8-12","muscleFocus":"Chest","notes":""},
+    {"exercise":"Close Grip Pull Down","sets":3,"repRange":"8-12","muscleFocus":"Back","notes":""},
+    {"exercise":"Shrug","sets":2,"repRange":"12-20","muscleFocus":"Shoulders","notes":""}
+  ];
+
+  localStorage.setItem("workoutPlan",JSON.stringify(plan));
+  localStorage.setItem(versionKey,"yes");
+
+  masterWorkingRoutine=null;
+  masterWorkingWorkout=null;
+  masterHasUnsavedChanges=false;
+  configurationHasUnsavedChanges=false;
+}
+
+
+function applyHardcodedMuscleGroupsV57(){
+  const versionKey="hardcodedMuscleGroupsV57";
+  if(localStorage.getItem(versionKey)==="yes") return;
+
+  const assignments={"Alpha":{"Bench Press":"Chest","Incline Dumbbell Press":"Chest","Pec Deck or Cable Fly":"Chest","Cable Lateral Raise":"Shoulder","Triceps Pushdown":"Triceps"},"Beta":{"Barbell Row":"Back","Wide-Grip Lat Pulldown":"Back","Seated Cable Row":"Back","Reverse Pec Deck":"Shoulder","Dumbbell or Cable Curl":"Biceps"},"Gamma":{"EZ-Bar Curl":"Biceps","Skull Crushers":"Triceps","Incline Dumbbell Curl":"Biceps","Rope Triceps Pushdown":"Triceps","Hanging Leg Raise":"Abs","Cable Crunch":"Abs"},"Delta":{"OH Press":"Shoulder","Shoulder Dumbbell Press":"Shoulder","Lateral Cable Raise":"Shoulder","Vert Chest Press":"Chest","Close Grip Pull Down":"Back","Shrug":"Shoulder"},"Epsilon":{"Back Squat":"Quads","Romanian Deadlift":"Hamstrings","Leg Press":"Quads","Leg Curl":"Hamstrings","Leg Extension":"Quads","Standing Calf Raise":"Calves"}};
+
+  Object.entries(assignments).forEach(([routineName,exerciseMap])=>{
+    const routine=plan.days[routineName]||[];
+    routine.forEach(ex=>{
+      const muscle=exerciseMap[ex.exercise];
+      if(muscle) ex.muscleFocus=muscle;
+    });
+  });
+
+  localStorage.setItem("workoutPlan",JSON.stringify(plan));
+  localStorage.setItem(versionKey,"yes");
+
+  masterWorkingRoutine=null;
+  masterWorkingWorkout=null;
+  masterHasUnsavedChanges=false;
+  configurationHasUnsavedChanges=false;
+}
+
 function migrateOldPlanIfNeeded(){
   const validNames=["Alpha","Beta","Gamma","Delta","Epsilon"];
   const labelMap={
@@ -5050,6 +5112,8 @@ function showPage(pageName,preserveSelectedDate=false){
     renderTabs();
     renderRoutineEditor();
     renderLog();
+    loadedFormSignature=getCurrentFormSignature();
+    refreshDirtyState();
     return;
   }
 
@@ -5192,6 +5256,8 @@ if(routineToggleBtn && workoutRoutineSection){
 }
 
 migrateOldPlanIfNeeded();
+applyHardcodedMuscleGroupsV57();
+applyDeltaDefaultTemplate();
 renderAll();
 </script>
 
