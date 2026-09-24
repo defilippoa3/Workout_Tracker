@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V60</title>
+<title>Workout Tracker V61</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2306,6 +2306,18 @@
 
 
   .previous-note{display:none !important;}
+
+  .set-row input[data-field="weight"]::placeholder,
+  .set-row input[data-field="reps"]::placeholder{
+    color:#788594 !important;
+    opacity:.45 !important;
+  }
+
+  .set-row input[data-field="weight"],
+  .set-row input[data-field="reps"]{
+    color:var(--text);
+  }
+
 </style>
 
 <style>
@@ -2661,15 +2673,107 @@ function getCurrentFormSignature(){
   })));
 }
 
-function refreshDirtyState(){
-  const logChanged=getCurrentFormSignature() !== loadedFormSignature;
-  const routineChanged=(
-    getWorkingRoutine(selectedDate,currentWorkout),
-    routineSignature(getWorkingRoutine(selectedDate,currentWorkout)) !== loadedRoutineSignature
-  );
+function getCurrentDailyStateSignature(){
+  const routine=getWorkingRoutine(selectedDate,currentWorkout);
 
-  hasUnsavedChanges=Boolean(logChanged || routineChanged);
-  routineHasUnsavedChanges=routineChanged;
+  const formFields=[...workoutArea.querySelectorAll(
+    'input[data-field="weight"], input[data-field="reps"], textarea[data-field="liftNote"]'
+  )].map(input=>({
+    ex:Number(input.dataset.ex),
+    set:Number(input.dataset.set||0),
+    field:String(input.dataset.field||""),
+    value:String(input.value||"").trim()
+  }));
+
+  const workoutNote=String(
+    document.getElementById("workoutNote")?.value||""
+  ).trim();
+
+  return JSON.stringify({
+    routine:routineSignature(routine),
+    form:formFields,
+    workoutNote
+  });
+}
+
+function getLastSavedDailyStateSignature(){
+  const saved=getLogForDate(selectedDate);
+  const savedMatches=saved &&
+    (saved.workoutName||saved.day)===currentWorkout &&
+    Array.isArray(saved.routineSnapshot);
+
+  const baselineRoutine=savedMatches
+    ? saved.routineSnapshot
+    : (dailyOnlyWorkouts.includes(currentWorkout)
+        ? []
+        : cloneRoutine(plan.days[currentWorkout]||[]));
+
+  const form=[];
+
+  if(savedMatches){
+    const snapshot=saved.routineSnapshot||[];
+    const savedExercises=saved.exercises||[];
+
+    snapshot.forEach((ex,exIndex)=>{
+      const savedEx=savedExercises.find(item=>
+        String(item.exercise||"").trim()===String(ex.exercise||"").trim()
+      );
+
+      (savedEx?.sets||[]).forEach(set=>{
+        if(set && (set.weight!==null && set.weight!==undefined && set.weight!==""
+          || set.reps!==null && set.reps!==undefined && set.reps!=="")){
+          if(set.weight!==null && set.weight!==undefined && set.weight!==""){
+            form.push({
+              ex:exIndex,set:Number(set.set||0),
+              field:"weight",value:String(set.weight).trim()
+            });
+          }
+          if(set.reps!==null && set.reps!==undefined && set.reps!==""){
+            form.push({
+              ex:exIndex,set:Number(set.set||0),
+              field:"reps",value:String(set.reps).trim()
+            });
+          }
+        }
+      });
+
+      if(String(savedEx?.notes||"").trim()){
+        form.push({
+          ex:exIndex,set:0,field:"liftNote",
+          value:String(savedEx.notes).trim()
+        });
+      }
+    });
+  }
+
+  return JSON.stringify({
+    routine:routineSignature(baselineRoutine),
+    form,
+    workoutNote:String(saved?.notes||"").trim()
+  });
+}
+
+function refreshDirtyState(){
+  const current=getCurrentDailyStateSignature();
+  const saved=getLastSavedDailyStateSignature();
+
+  hasUnsavedChanges=current!==saved;
+  routineHasUnsavedChanges=
+    routineSignature(getWorkingRoutine(selectedDate,currentWorkout)) !==
+    routineSignature(
+      (() => {
+        const savedLog=getLogForDate(selectedDate);
+        if(savedLog &&
+           (savedLog.workoutName||savedLog.day)===currentWorkout &&
+           Array.isArray(savedLog.routineSnapshot)){
+          return savedLog.routineSnapshot;
+        }
+        return dailyOnlyWorkouts.includes(currentWorkout)
+          ? []
+          : cloneRoutine(plan.days[currentWorkout]||[]);
+      })()
+    );
+
   return hasUnsavedChanges;
 }
 
@@ -2678,9 +2782,10 @@ function markDirty(){
 }
 
 function attemptNavigation(action){
-  refreshDirtyState();
+  const dirty=refreshDirtyState();
 
-  if(!hasUnsavedChanges){
+  if(!dirty){
+    pendingNavigation=null;
     action();
     return;
   }
@@ -2690,8 +2795,11 @@ function attemptNavigation(action){
   // Invalid Sets require the user to fix the value before leaving.
   // Therefore, the normal Save-and-Leave option is not offered.
   if(hasInvalidSetCounts()){
+    document.getElementById("invalidSetsOverlay").classList.remove("open");
+    document.getElementById("unsavedOverlay").classList.remove("open");
     document.getElementById("invalidSetsOverlay").classList.add("open");
   }else{
+    document.getElementById("invalidSetsOverlay").classList.remove("open");
     document.getElementById("unsavedOverlay").classList.add("open");
   }
 }
@@ -2739,8 +2847,6 @@ function saveAndConfirmUnsavedNavigation(){
   }
 
   const action=pendingNavigation;
-
-  // Save the workout currently on screen before performing the pending navigation.
   const saved=saveCurrentWorkout();
 
   if(!saved){
@@ -2748,8 +2854,6 @@ function saveAndConfirmUnsavedNavigation(){
   }
 
   pendingNavigation=null;
-  hasUnsavedChanges=false;
-  routineHasUnsavedChanges=false;
   document.getElementById("unsavedOverlay").classList.remove("open");
 
   if(typeof action==="function"){
@@ -4092,8 +4196,17 @@ function renderLog(){
       const savedSet=savedEx?.sets?.find(x=>Number(x.set)===s)||{};
       const previousSet=previousEx?.sets?.find(x=>Number(x.set)===s)||{};
 
-      const weightHint=previousSet.weight!=null?`${previousSet.weight}`:"Weight";
-      const repsHint=previousSet.reps!=null?`${previousSet.reps}`:"Reps";
+      const weightHint=(
+        previousSet.weight!==null &&
+        previousSet.weight!==undefined &&
+        previousSet.weight!==""
+      ) ? `${previousSet.weight}` : "Weight";
+
+      const repsHint=(
+        previousSet.reps!==null &&
+        previousSet.reps!==undefined &&
+        previousSet.reps!==""
+      ) ? `${previousSet.reps}` : "Reps";
 
       const row=document.createElement("div");
       row.className="set-row";
