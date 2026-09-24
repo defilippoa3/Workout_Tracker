@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V62</title>
+<title>Workout Tracker V64</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2613,9 +2613,9 @@
       <h3 id="unsavedTitle">WARNING</h3>
       <p>You have unsaved data that may be lost forever.</p>
       <div class="unsaved-actions">
-        <button type="button" onclick="cancelUnsavedNavigation()">Stay Here</button>
-        <button type="button" class="primary" onclick="saveAndConfirmUnsavedNavigation()">Leave With Saving</button>
-        <button type="button" class="danger" onclick="confirmUnsavedNavigation()">Leave Without Saving</button>
+        <button type="button" id="unsavedStayHereBtn">Stay Here</button>
+        <button type="button" class="primary" id="unsavedSaveLeaveBtn">Leave With Saving</button>
+        <button type="button" class="danger" id="unsavedLeaveWithoutSavingBtn">Leave Without Saving</button>
       </div>
     </div>
   </div>
@@ -2816,32 +2816,46 @@ function attemptNavigation(action){
 
   if(!dirty){
     pendingNavigation=null;
-    action();
+    if(typeof action==="function"){
+      action();
+    }
+    return;
+  }
+
+  if(typeof action!=="function"){
     return;
   }
 
   pendingNavigation=action;
 
-  // Invalid Sets require the user to fix the value before leaving.
-  // Therefore, the normal Save-and-Leave option is not offered.
+  const invalidOverlay=document.getElementById("invalidSetsOverlay");
+  const unsavedOverlay=document.getElementById("unsavedOverlay");
+
   if(hasInvalidSetCounts()){
-    document.getElementById("invalidSetsOverlay").classList.remove("open");
-    document.getElementById("unsavedOverlay").classList.remove("open");
-    document.getElementById("invalidSetsOverlay").classList.add("open");
+    invalidOverlay.classList.remove("open");
+    unsavedOverlay.classList.remove("open");
+    invalidOverlay.classList.add("open");
   }else{
-    document.getElementById("invalidSetsOverlay").classList.remove("open");
-    document.getElementById("unsavedOverlay").classList.add("open");
+    invalidOverlay.classList.remove("open");
+    unsavedOverlay.classList.remove("open");
+    unsavedOverlay.classList.add("open");
   }
 }
 
+
+
 function cancelUnsavedNavigation(){
   document.getElementById("unsavedOverlay").classList.remove("open");
+  // Do not discard changes. Do not execute pending navigation.
   pendingNavigation=null;
   refreshDirtyState();
 }
 
+
+
 function confirmUnsavedNavigation(){
   const action=pendingNavigation;
+
   pendingNavigation=null;
   hasUnsavedChanges=false;
   routineHasUnsavedChanges=false;
@@ -2849,12 +2863,19 @@ function confirmUnsavedNavigation(){
   temporaryRoutineKey=null;
   dailyBaselineKey=null;
   dailyBaselineState=null;
+
   document.getElementById("unsavedOverlay").classList.remove("open");
 
   if(typeof action==="function"){
-    action();
+    try{
+      action();
+    }catch(err){
+      console.error("Leave Without Saving navigation error:",err);
+    }
   }
 }
+
+
 
 function cancelInvalidSetsNavigation(){
   pendingNavigation=null;
@@ -2872,26 +2893,51 @@ function confirmInvalidSetsNavigation(){
 }
 
 function saveAndConfirmUnsavedNavigation(){
+  const overlay=document.getElementById("unsavedOverlay");
+  const invalidOverlay=document.getElementById("invalidSetsOverlay");
+
+  // Do not allow the normal save-and-leave action when the workout has
+  // invalid Sets values. The separate invalid-data popup must handle that.
   if(hasInvalidSetCounts()){
-    document.getElementById("unsavedOverlay").classList.remove("open");
-    document.getElementById("invalidSetsOverlay").classList.add("open");
-    return;
+    overlay.classList.remove("open");
+    invalidOverlay.classList.add("open");
+    return false;
   }
 
   const action=pendingNavigation;
+
+  if(typeof action!=="function"){
+    // No queued destination means there is nowhere to navigate.
+    overlay.classList.remove("open");
+    pendingNavigation=null;
+    return false;
+  }
+
+  // Keep the destination before saving. saveCurrentWorkout re-renders the
+  // workout and changes temporary state, so the navigation callback must be
+  // captured first.
   const saved=saveCurrentWorkout();
 
   if(!saved){
-    return;
+    return false;
   }
 
+  // Explicitly close and clear the modal before navigating.
+  overlay.classList.remove("open");
   pendingNavigation=null;
-  document.getElementById("unsavedOverlay").classList.remove("open");
 
-  if(typeof action==="function"){
+  // The save operation established the new clean baseline. Now execute the
+  // exact page action that caused the warning.
+  try{
     action();
+  }catch(err){
+    console.error("Leave With Saving navigation error:",err);
   }
+
+  return true;
 }
+
+
 
 function normalizeExerciseName(name){
   return String(name||"").trim().toLowerCase();
@@ -4760,11 +4806,17 @@ function saveCurrentWorkout(){
   loadedRoutineSignature=routineSignature(routineSnapshot);
   hasUnsavedChanges=false;
 
-  document.getElementById("logStatus").textContent="Workout saved.";
-  setTimeout(
-    ()=>document.getElementById("logStatus").textContent="",
-    1400
-  );
+  const saveStatus=document.getElementById("logStatus");
+  if(saveStatus){
+    saveStatus.textContent="Workout saved.";
+    setTimeout(
+      ()=>{
+        const currentStatus=document.getElementById("logStatus");
+        if(currentStatus) currentStatus.textContent="";
+      },
+      1400
+    );
+  }
 
   renderCalendar();
   renderCalendarSummary();
@@ -5281,8 +5333,6 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
       const goToday=()=>showPage("workout",false);
 
       if(currentPage==="workout"){
-        refreshDirtyState();
-
         if(refreshDirtyState()){
           attemptNavigation(goToday);
         }else{
@@ -5312,6 +5362,34 @@ function renderAll(){
   showPage(currentPage,currentPage==="workout");
 }
 
+
+const unsavedStayHereBtn=document.getElementById("unsavedStayHereBtn");
+const unsavedSaveLeaveBtn=document.getElementById("unsavedSaveLeaveBtn");
+const unsavedLeaveWithoutSavingBtn=document.getElementById("unsavedLeaveWithoutSavingBtn");
+
+if(unsavedStayHereBtn){
+  unsavedStayHereBtn.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    cancelUnsavedNavigation();
+  });
+}
+
+if(unsavedSaveLeaveBtn){
+  unsavedSaveLeaveBtn.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    saveAndConfirmUnsavedNavigation();
+  });
+}
+
+if(unsavedLeaveWithoutSavingBtn){
+  unsavedLeaveWithoutSavingBtn.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    confirmUnsavedNavigation();
+  });
+}
 
 document.getElementById("unsavedOverlay").addEventListener("click",e=>{
   if(e.target.id==="unsavedOverlay"){
