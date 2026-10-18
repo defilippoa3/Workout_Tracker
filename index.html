@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V64</title>
+<title>Workout Tracker V65</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -4663,20 +4663,30 @@ document.getElementById("nextMonthBtn").onclick=()=>{
 
 
 document.getElementById("addMasterExerciseBtn").onclick=()=>{
-  if(!plan.days[masterCurrentWorkout]){
-    masterCurrentWorkout=Object.keys(plan.days)[0] || "Alpha";
+  // Edit the working master template, not the persisted plan. The old
+  // handler modified plan.days and then overwrote it with the working copy.
+  const routine=getMasterWorkingRoutine();
+  const existing=new Set(routine.map(ex=>String(ex.exercise||"").trim().toLowerCase()));
+  let number=1;
+  let name="New Exercise";
+  while(existing.has(name.toLowerCase())){
+    number++;
+    name=`New Exercise ${number}`;
   }
-
-  plan.days[masterCurrentWorkout].push({
-    exercise:"New Exercise",
+  routine.push({
+    exercise:name,
     sets:3,
     repRange:"8-12",
-    muscleFocus:"Other",
+    muscleFocus:muscleGroups[0]||"",
     notes:""
   });
-
-  saveMasterPlan();
+  masterHasUnsavedChanges=true;
+  configurationHasUnsavedChanges=true;
   renderMasterRoutineEditor();
+  refreshConfigurationSaveState();
+  const inputs=[...document.querySelectorAll('#masterRoutineEditor input[data-master-edit="exercise"]')];
+  const last=inputs[inputs.length-1];
+  if(last){last.focus({preventScroll:true});last.select();}
 };
 
 document.getElementById("addExerciseBtn").onclick=()=>{
