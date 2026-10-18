@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Workout Tracker V65</title>
+<title>Workout Tracker V66</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -2503,6 +2503,7 @@
           <div class="routine-top" style="margin-top:16px;">
             <div>
               <div class="routine-title" id="masterRoutineTitle">Alpha</div>
+              <div class="muted" id="masterRoutineDescription" style="font-size:13px;line-height:1.5;margin-top:5px;">Edit the master template for future workout days.</div>
               <div class="muted">Edit the default routine for future workouts.</div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2650,6 +2651,7 @@ let pendingNavigation=null;
 
 const workoutColors={Alpha:"#ff5b66",Beta:"#4f8cff",Gamma:"#32c982",Delta:"#ff9f43",Epsilon:"#ffd84d",Omega:"#ffffff"};
 const dailyOnlyWorkouts=["Omega"];
+function workoutDisplayName(name){ return name==="Omega" ? "Cardio" : name; }
 
 function routineSignature(r){
   return JSON.stringify((r||[]).map(ex=>({
@@ -3741,7 +3743,7 @@ function renderTabs(){
     btn.type="button";
     btn.className="workout-tab"+(name===currentWorkout?" active":"");
     btn.dataset.workout=name;
-    btn.textContent=name;
+    btn.textContent=workoutDisplayName(name);
 
     btn.onclick=()=>{
       if(name===currentWorkout) return;
@@ -3774,12 +3776,14 @@ function updateCurrentSetFieldVisual(i,value){
 function renderRoutineEditor(){
   resolveWorkoutForDate(selectedDate);
 
-  routineTitle.textContent=currentWorkout;
+  routineTitle.textContent=workoutDisplayName(currentWorkout);
   const routineHelpText=document.getElementById("routineHelpText");
   if(routineHelpText){
-    routineHelpText.textContent=dailyOnlyWorkouts.includes(currentWorkout)
-      ? "Omega starts completely blank. Add whatever exercises you want for this day."
-      : "If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.";
+    routineHelpText.textContent=currentWorkout==="Omega"
+      ? "Cardio day: starts blank. Add cardio activities and record your workout details for this date."
+      : currentWorkout==="Epsilon"
+        ? "Spare workout template for lifting with someone else on their split. Customize this day's routine without changing the master template."
+        : "If no workout is saved for this date, this starts from the current master template. Routine changes are temporary until you press Save Workout.";
   }
   routineEditor.innerHTML="";
 
@@ -3985,6 +3989,8 @@ function renderMasterRoutineEditor(){
   }
 
   title.textContent=masterCurrentWorkout;
+  const masterDescription=document.getElementById("masterRoutineDescription");
+  if(masterDescription) masterDescription.textContent=masterCurrentWorkout==="Epsilon" ? "Spare workout template for lifting with someone else on their split. Edit the exercises to match their workout." : "Edit the master template for future workout days.";
   editor.innerHTML="";
 
   const routine=getMasterWorkingRoutine();
@@ -4236,7 +4242,7 @@ function renderLog(){
     currentWorkout
   );
 
-  logTitle.textContent=currentWorkout;
+  logTitle.textContent=workoutDisplayName(currentWorkout);
   dateLabel.textContent=prettyDate(selectedDate);
   workoutArea.innerHTML="";
 
@@ -4330,7 +4336,7 @@ function renderLog(){
     selectedDateBanner.innerHTML=
       `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>`+
       `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${savedColor};margin-right:6px;"></span>`+
-      `${escapeHtml(savedWorkoutName)} saved on this date.`;
+      `${escapeHtml(workoutDisplayName(savedWorkoutName))} saved on this date.`;
   }else{
     selectedDateBanner.innerHTML=
       `<strong>${escapeHtml(prettyDate(selectedDate))}</strong><br>No saved workout on this date.`;
@@ -4451,7 +4457,7 @@ function renderCalendarSummary(){
         <div>
           <div class="calendar-summary-title">
             <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${workoutColor};margin-right:7px;"></span>
-            ${escapeHtml(workoutName)}
+            ${escapeHtml(workoutDisplayName(workoutName))}
           </div>
           <div class="calendar-summary-date">${escapeHtml(workoutHeaderDate(selectedDate))}</div>
           ${workoutHasMissingData(saved) ? '<div class="legacy-explanation" style="color:#ff8c94;">! This workout has missing weight or rep data.</div>' : ''}
